@@ -4,7 +4,7 @@ Ordered vertical slices. Each slice leaves the app working and demoable. Strateg
 get a **playable offline daily loop on the Europe slice first**, then add auth/sync,
 then progress polish + PWA, then scale to the whole world.
 
-> **▶ Current slice: 1 — Content & domain data (Europe).**
+> **▶ Current slice: 2 — Card engine & FSRS (local, headless).**
 > This is the next slice to build. Update this line whenever a slice is completed — set it to
 > the next slice number/name, or to "✅ all slices complete" when the roadmap is done.
 
@@ -27,14 +27,16 @@ into the real session runner in Slice 3.
   tiny demo page. ✅ — `/demo` (`src/views/DemoView.vue`) showcases all four components; the
   prototypes (`FlagQuiz`/`LocationQuiz`) are left untouched, folded in at Slice 3.
 
-## Slice 1 — Content & domain data (Europe)
+## Slice 1 — Content & domain data (Europe) ✅
 **Goal:** a typed country catalog the quizzes draw from.
-- Country model: ISO numeric id, ISO2 (flags), name, continent, population (for triage sort),
+- ✅ Country model: ISO numeric id, ISO2 (flags), name, continent, population (for triage sort),
   map framing info. Seed the Europe set.
-- Flag URL helper (flagcdn by ISO2). Map geometry from world-atlas TopoJSON (as in the
+- ✅ Flag URL helper (flagcdn by ISO2). Map geometry from world-atlas TopoJSON (as in the
   LocationQuiz prototype), with a per-region projection frame.
 - **Done when:** a `countries` module exposes the Europe deck and both a flag URL and a map
-  path for each.
+  path for each. ✅ — `src/data/` exposes `EUROPE` (37-country typed deck), `flagUrl(iso2)`,
+  per-continent `REGION_FRAMES` + `regionShapes()`/`shapesFor()`, and precomputed
+  `EUROPE_SHAPES` (map path per country). `/demo` renders the deck as a region map + flag grid.
 
 ## Slice 2 — Card engine & FSRS (local, headless)
 **Goal:** scheduling logic with no UI.
