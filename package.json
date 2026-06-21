@@ -1,5 +1,5 @@
 {
-  "name": "sonique",
+  "name": "geoquizz",
   "version": "0.0.0",
   "private": true,
   "type": "module",
@@ -16,14 +16,19 @@
   },
   "dependencies": {
     "@iconify/vue": "^5.0.0",
+    "d3-geo": "^3.1.1",
     "pinia": "^3.0.4",
+    "topojson-client": "^3.1.0",
     "vue": "^3.5.31",
-    "vue-router": "^5.0.4"
+    "vue-router": "^5.0.4",
+    "world-atlas": "^2.0.2"
   },
   "devDependencies": {
     "@tailwindcss/vite": "^4.2.2",
     "@tsconfig/node24": "^24.0.4",
+    "@types/d3-geo": "^3.1.0",
     "@types/node": "^24.12.0",
+    "@types/topojson-client": "^3.1.5",
     "@vitejs/plugin-vue": "^6.0.5",
     "@vue/eslint-config-typescript": "^14.7.0",
     "@vue/tsconfig": "^0.9.1",

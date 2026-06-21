@@ -1,54 +1,32 @@
-<p align='center'>
-  <img src='https://raw.githubusercontent.com/GueganVictor/GueganVictor/master/sonique.png' alt='Sonique'/>
-</p>
+<h1 align="center">GeoQuizz</h1>
 
-<h4 align='center'>
-A simple Vue & Vite application with a minimal welcome page
+<h4 align="center">
+Learn the world, one country a day — a mobile-first geography quiz PWA.
 </h4>
 
 <hr/>
 
-## Features
+GeoQuizz teaches two skills — **placing countries on a map** and **naming flags** —
+as a daily, flashcard-style spaced-repetition habit with per-user progress tracking.
+Inspired by world-geography-games.com.
 
-- ⚡️ [Vue 3](https://github.com/vuejs/core), [Vite 8](https://github.com/vitejs/vite)
+See [docs/DESIGN.md](docs/DESIGN.md) for the architecture and visual design, and
+[docs/ROADMAP.md](docs/ROADMAP.md) for the build plan (vertical slices).
 
-- 🎨 [Tailwind CSS 4](https://tailwindcss.com/)
+## Stack
 
+- ⚡️ [Vue 3](https://github.com/vuejs/core) + [Vite 8](https://github.com/vitejs/vite)
+- 🧭 [Vue Router](https://router.vuejs.org/) + [Pinia](https://pinia.vuejs.org/)
+- 🎨 [Tailwind CSS 4](https://tailwindcss.com/) + [Baloo 2](https://fonts.google.com/specimen/Baloo+2)
+- 🗺️ [d3-geo](https://github.com/d3/d3-geo) + [world-atlas](https://github.com/topojson/world-atlas) TopoJSON maps
 - 😃 [Iconify for Vue](https://iconify.design/docs/icon-components/vue/)
-
 - 📋 [TypeScript](https://www.typescriptlang.org/)
 
-- 🧹 [Oxlint](https://oxc.rs/docs/guide/usage/linter.html), [Oxfmt](https://oxc.rs/docs/guide/usage/formatter.html)
-
-<hr/>
-
-## Installation Steps
-
-### Clone to local
+## Develop
 
 ```bash
-git clone https://github.com/GueganVictor/sonique.git
-cd sonique
 npm install
-```
-
-### Run the project
-
-```bash
-npm run dev
-```
-
-The Vite dev server runs on [http://localhost:3456](http://localhost:3456).
-
-### Useful commands
-
-```bash
-npm run build
+npm run dev          # http://localhost:3456
 npm run type-check
-npm run lint
-npm run format
+npm run build
 ```
-
-<hr/>
-
-## Have fun coding ! 🤖

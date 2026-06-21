@@ -1,0 +1,16 @@
+import { createRouter, createWebHistory } from 'vue-router'
+
+import HomeView from '@/views/HomeView.vue'
+
+const router = createRouter({
+  history: createWebHistory(),
+  routes: [
+    { path: '/', name: 'home', component: HomeView },
+    { path: '/map', name: 'map', component: () => import('@/views/MapView.vue') },
+    { path: '/profile', name: 'profile', component: () => import('@/views/ProfileView.vue') },
+    // Slice 0 component showcase — proves the shared UI renders.
+    { path: '/demo', name: 'demo', component: () => import('@/views/DemoView.vue') },
+  ],
+})
+
+export default router

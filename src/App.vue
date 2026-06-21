@@ -1,14 +1,30 @@
 <script setup lang="ts">
-import logo from './assets/logo.png'
+import { RouterView } from 'vue-router'
+
+import BottomNav from './components/BottomNav.vue'
 </script>
 
 <template>
-  <main class="flex min-h-screen items-center justify-center px-6 text-stone-100">
-    <section class="flex flex-col items-center gap-12 text-center">
-      <img :src="logo" alt="Sonique logo" class="w-24 object-contain sm:w-28" />
-      <h1 class="font-display text-5xl leading-none tracking-[-0.05em]">
-        sonique.
-      </h1>
-    </section>
-  </main>
+  <!-- Phone-framed app shell. Default continent hue = Europe (the v1 slice). -->
+  <div class="shell" style="--region: var(--color-europe)">
+    <main class="shell__view">
+      <RouterView />
+    </main>
+    <BottomNav />
+  </div>
 </template>
+
+<style scoped>
+.shell {
+  display: flex;
+  flex-direction: column;
+  max-width: 430px;
+  min-height: 100vh;
+  margin: 0 auto;
+  background: #fff;
+}
+.shell__view {
+  flex: 1;
+  min-height: 0;
+}
+</style>
