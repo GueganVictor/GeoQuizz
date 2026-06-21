@@ -4,7 +4,7 @@ Ordered vertical slices. Each slice leaves the app working and demoable. Strateg
 get a **playable offline daily loop on the Europe slice first**, then add auth/sync,
 then progress polish + PWA, then scale to the whole world.
 
-> **▶ Current slice: 2 — Card engine & FSRS (local, headless).**
+> **▶ Current slice: 3 — Quiz session runner (both skills).**
 > This is the next slice to build. Update this line whenever a slice is completed — set it to
 > the next slice number/name, or to "✅ all slices complete" when the roadmap is done.
 
@@ -38,13 +38,18 @@ into the real session runner in Slice 3.
   per-continent `REGION_FRAMES` + `regionShapes()`/`shapesFor()`, and precomputed
   `EUROPE_SHAPES` (map path per country). `/demo` renders the deck as a region map + flag grid.
 
-## Slice 2 — Card engine & FSRS (local, headless)
+## Slice 2 — Card engine & FSRS (local, headless) ✅
 **Goal:** scheduling logic with no UI.
-- Card = (country × skill). Integrate `ts-fsrs`.
-- Append-only **review log** in IndexedDB; card state derived by replay (per DESIGN §7).
-- Scheduler: due-card selection + daily new-card queue (15 countries/day, random) + hooks for
+- ✅ Card = (country × skill). Integrate `ts-fsrs`.
+- ✅ Append-only **review log** in IndexedDB; card state derived by replay (per DESIGN §7).
+- ✅ Scheduler: due-card selection + daily new-card queue (15 countries/day, random) + hooks for
   calibration seeding.
-- **Done when:** a store can return "next due/new card" and record a grade, surviving reload.
+- **Done when:** a store can return "next due/new card" and record a grade, surviving reload. ✅ —
+  `src/engine/` (types, `db` IndexedDB append-only log, `replay` FSRS state derivation, `scheduler`
+  due+new selection with 15-country/day cap) + `src/stores/session.ts` Pinia store exposing
+  `init`/`nextCard`/`recordGrade`/`seedCountry`(triage hook)/`reset`. Verified in-browser: grade →
+  FSRS step, 15-country daily cap, triage seed, and full state restored by replay after reload.
+  A DEV-only `window.__session` handle (main.ts) drives it headlessly until Slice 3 adds UI.
 
 ## Slice 3 — Quiz session runner (both skills)
 **Goal:** the playable loop, offline, end-to-end.
