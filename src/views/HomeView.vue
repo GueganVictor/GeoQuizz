@@ -15,6 +15,22 @@ const session = useSessionStore()
 const ready = ref(false)
 const load = ref(0) // total cards a session starting now can serve
 
+// Free play (practice mode): test yourself on a whole deck outside the daily loop.
+// The full world plus each region, each carrying its continent hue (DESIGN §11).
+const FREE_SCOPES = [
+  { scope: 'world', label: 'Full World', color: 'var(--region, var(--color-europe))' },
+  { scope: 'europe', label: 'Europe', color: 'var(--color-europe)' },
+  { scope: 'asia', label: 'Asia', color: 'var(--color-asia)' },
+  { scope: 'africa', label: 'Africa', color: 'var(--color-africa)' },
+  { scope: 'namerica', label: 'North America', color: 'var(--color-namerica)' },
+  { scope: 'samerica', label: 'South America', color: 'var(--color-samerica)' },
+  { scope: 'oceania', label: 'Oceania', color: 'var(--color-oceania)' },
+] as const
+
+function playFree(scope: string) {
+  router.push(`/free/${scope}`)
+}
+
 const due = computed(() => session.dueCount)
 const fresh = computed(() => Math.max(0, load.value - due.value)) // new cards in the load
 const streak = computed(() => session.streak)
@@ -69,6 +85,24 @@ onMounted(async () => {
 
     <!-- Loading the log -->
     <div v-else class="card card--skeleton" aria-hidden="true" />
+
+    <!-- Free play: practice a whole deck outside the spaced-repetition loop -->
+    <div v-if="ready" class="free">
+      <p class="free__kicker">Free play</p>
+      <p class="free__hint">Test yourself on a whole region — no streak, no scheduling.</p>
+      <div class="free__grid">
+        <button
+          v-for="s in FREE_SCOPES"
+          :key="s.scope"
+          class="chip"
+          :class="{ 'chip--wide': s.scope === 'world' }"
+          :style="`--chip: ${s.color}`"
+          @click="playFree(s.scope)"
+        >
+          {{ s.label }}
+        </button>
+      </div>
+    </div>
   </section>
 </template>
 
@@ -202,5 +236,47 @@ onMounted(async () => {
   background: #f0f0f5;
   border-color: #e3e3ec;
   box-shadow: none;
+}
+
+/* Free play deck picker */
+.free__kicker {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 15px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #2b2b3a;
+}
+.free__hint {
+  margin: 4px 0 14px;
+  font-weight: 700;
+  font-size: 13px;
+  color: #6b6b7a;
+}
+.free__grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+.chip {
+  padding: 16px 12px;
+  border-radius: 18px;
+  border: 3px solid #222a33;
+  background: var(--chip);
+  color: #fff;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 16px;
+  cursor: pointer;
+  box-shadow: 0 4px 0 rgba(34, 42, 51, 0.22), 0 8px 12px rgba(0, 0, 0, 0.12);
+  transition: transform 0.08s ease, box-shadow 0.08s ease;
+}
+.chip--wide {
+  grid-column: 1 / -1;
+}
+.chip:active {
+  transform: translateY(4px);
+  box-shadow: 0 0 0 rgba(34, 42, 51, 0.22), 0 3px 5px rgba(0, 0, 0, 0.12);
 }
 </style>

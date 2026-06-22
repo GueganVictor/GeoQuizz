@@ -10,7 +10,7 @@ import { useSyncStore } from './stores/sync'
 // A quiz session and the first-run triage are focused modes: hide the bottom tabs
 // so the in-screen controls are the only way out.
 const route = useRoute()
-const FOCUSED = new Set(['session', 'onboarding'])
+const FOCUSED = new Set(['session', 'onboarding', 'free'])
 const showNav = computed(() => !FOCUSED.has(route.name as string))
 
 // Startup (Slice 6): load the local log, restore any auth session, then arm cloud

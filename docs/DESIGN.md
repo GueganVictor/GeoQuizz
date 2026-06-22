@@ -52,6 +52,22 @@ Status: design agreed, pre-implementation. v1 target = full loop, Europe slice f
   the onboarding top-100, plus any onboarding countries still unlearned). No ordering.
 - Finishable daily goal (Anki-style), combining FSRS due reviews with the daily new-card cap.
 
+## 4b. Free play (practice mode)
+
+A second, **opt-in** play model alongside the daily SRS loop. From the home screen the user can
+drill a **whole deck** — the full world or any single continent — outside the scheduler.
+
+- **Independent of FSRS.** Free play **never touches the review log**: no grading, no scheduling,
+  no streak, no progress/mastery impact. It is pure practice.
+- **Content:** the entire card set for the chosen scope (every country × both skills), freshly
+  **shuffled** each run; an in-run "consecutive correct" streak and a final score (`correct / total`)
+  with a **Play again** reshuffle.
+- **Per-answer feedback** reuses the colored result sheet, but with **no self-rate** — just a
+  **Next** button (there is no FSRS grade to record).
+- **Theming:** each card adopts its country's continent hue (so a world run shifts color per card),
+  matching the daily session. Routed at `/free/:scope` as a **focused mode** (bottom nav hidden,
+  like `/session` and `/onboarding`).
+
 ## 5. Map game
 
 - **Rendering:** inline **SVG** generated at build time from **Natural Earth / world-atlas
@@ -61,6 +77,13 @@ Status: design agreed, pre-implementation. v1 target = full loop, Europe slice f
   target country).
 - **Region-scoped maps:** each region gets its own projected SVG — a single world projection
   makes small countries untappable even when zoomed. (Build-time pipeline; proven on Europe.)
+- **Surrounding-world context:** behind the region's own (interactive) deck, every *other*
+  atlas country that falls inside the region frame is drawn as a **greyed, non-interactive
+  backdrop** (paler fill, faint outline, `pointer-events:none`), so each region reads in world
+  context instead of floating on white. The deck fill is darkened so the playable region still
+  stands out. Hit-testing is unchanged — context paths carry no `data-id` and never intercept
+  taps. (`geometry.contextShapes`, lazily memoized per continent; used by the location card,
+  onboarding card, and the mastery map.)
 
 ## 6. Flags
 

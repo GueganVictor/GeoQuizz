@@ -4,10 +4,10 @@ Ordered vertical slices. Each slice leaves the app working and demoable. Strateg
 get a **playable offline daily loop on the Europe slice first**, then add auth/sync,
 then progress polish + PWA, then scale to the whole world.
 
-> **▶ Current slice: ✅ all slices complete.**
-> The roadmap is done — the full daily-habit loop ships worldwide (all six continents). Update
-> this line whenever a slice is completed — set it to the next slice number/name, or to
-> "✅ all slices complete" when the roadmap is done.
+> **▶ Current slice: ✅ all slices complete (through Slice 10 — free play).**
+> The roadmap is done — the full daily-habit loop ships worldwide (all six continents), plus a
+> free-play practice mode. Update this line whenever a slice is completed — set it to the next
+> slice number/name, or to "✅ all slices complete" when the roadmap is done.
 
 See [DESIGN.md](DESIGN.md) for the agreed architecture (§1–10) and visual design (§11).
 
@@ -187,6 +187,20 @@ in and removed in Slice 3.
   distractors, MapView six color-coded sections with Egypt shaded orange; fresh log still gates
   to onboarding. Roster ≈ Europe 44 / Asia 49 / Africa 54 / N.America 23 / S.America 12 /
   Oceania 13.
+
+## Slice 10 — Free play (practice mode) ✅
+**Goal:** a way to drill a whole deck outside the daily spaced-repetition loop (DESIGN §4b).
+- ✅ Practice any scope — the full world or a single continent — picked from the home screen.
+- ✅ Pure practice: never writes the review log (no FSRS grading, scheduling, streak, or mastery
+  impact); whole card set shuffled, scored, replayable.
+- **Done when:** you can pick a deck on Home and play it end-to-end without affecting progress. ✅ —
+  `/free/:scope` (`src/views/FreeView.vue`): shuffles the full card set for the scope (every country
+  × both skills), reuses `FlagCard`/`LocationCard` + `ResultSheet` (no self-rate — just **Next**),
+  tracks an in-run consecutive-correct streak + `correct / total` score with a **Play again**
+  reshuffle and a 🌍 done screen. Each card adopts its continent hue; same-continent flag
+  distractors (topped up from world), mirroring the daily runner. A **Free play** deck picker
+  (Full World + six continent chips, each in its hue) was added to `HomeView`; the route is a
+  focused mode (bottom nav hidden, added to `App.vue`'s `FOCUSED` set). Unknown scopes redirect home.
 
 ---
 
