@@ -4,7 +4,7 @@ Ordered vertical slices. Each slice leaves the app working and demoable. Strateg
 get a **playable offline daily loop on the Europe slice first**, then add auth/sync,
 then progress polish + PWA, then scale to the whole world.
 
-> **▶ Current slice: 7 — Progress views.**
+> **▶ Current slice: 8 — PWA + juice.**
 > This is the next slice to build. Update this line whenever a slice is completed — set it to
 > the next slice number/name, or to "✅ all slices complete" when the roadmap is done.
 
@@ -121,11 +121,24 @@ in and removed in Slice 3.
   6-event log → **identical** FSRS state, re-pull adds 0 (uid dedup), shuffled merge order →
   identical state. Live authenticated upsert/select taken on trust (magic-link click not automatable).
 
-## Slice 7 — Progress views
+## Slice 7 — Progress views ✅
 **Goal:** the "track my progress" surface (DESIGN §8).
-- World/region mastery map (continent-hue saturation ramp), per-region accuracy/retention,
+- ✅ World/region mastery map (continent-hue saturation ramp), per-region accuracy/retention,
   activity heatmap.
-- **Done when:** the Map/Progress tab shows mastery + stats driven by real review data.
+- **Done when:** the Map/Progress tab shows mastery + stats driven by real review data. ✅ —
+  `/map` (`src/views/MapView.vue`) rebuilt from the placeholder, all three driven by the replayed
+  log. New pure engine module `src/engine/progress.ts`: `countryMastery` (per-country level 0–4 =
+  **min** of its two skills' `cardLevel(stability)`, so a country is only as mastered as its weaker
+  skill), `regionAccuracy` (overall + per-skill pass-rate over `via:'review'` events; triage seeds
+  excluded), `avgRetention` (mean FSRS `get_retrievability` across introduced cards), and
+  `activityByDay`/`dayKey` for the heatmap. The view renders: a **mastery map** reusing
+  `EUROPE_SHAPES`, each country shaded along the Europe hue via a `color-mix` saturation ramp
+  (unlearned = grey) + a Less→More legend; a **Europe stats card** (mastered N/37, accuracy %,
+  retention %, per-skill Flags/Map accuracy bars); and an **18-week Anki-style activity heatmap**
+  (weekday rows × week columns, hue-ramp intensity buckets, future cells blank). Verified in
+  preview (type-check clean): seeded a 59-event multi-day log → map painted the expected ramp
+  (4 mastered, learning/strong tiers distinct), stats read 88% accuracy / 95% retention /
+  Flags 90% / Map 86%, heatmap lit the seeded recent days; then reset local log to empty.
 
 ## Slice 8 — PWA + juice
 **Goal:** installable, offline, polished daily-habit app.
