@@ -4,15 +4,16 @@ Ordered vertical slices. Each slice leaves the app working and demoable. Strateg
 get a **playable offline daily loop on the Europe slice first**, then add auth/sync,
 then progress polish + PWA, then scale to the whole world.
 
-> **▶ Current slice: 4 — Daily home + streak.**
+> **▶ Current slice: 5 — Onboarding calibration.**
 > This is the next slice to build. Update this line whenever a slice is completed — set it to
 > the next slice number/name, or to "✅ all slices complete" when the roadmap is done.
 
 See [DESIGN.md](DESIGN.md) for the agreed architecture (§1–10) and visual design (§11).
 
-Current state: the playable offline loop is live — `/session` (`src/views/SessionView.vue`) pulls
-cards from the engine and renders `FlagCard`/`LocationCard`. The throwaway prototypes
-(`FlagQuiz.vue`/`LocationQuiz.vue`) were folded in and removed in Slice 3.
+Current state: the daily-habit loop is live — `/` (`src/views/HomeView.vue`) shows today's load
++ streak and launches `/session` (`src/views/SessionView.vue`), which pulls cards from the engine
+and renders `FlagCard`/`LocationCard`. The throwaway prototypes (`FlagQuiz.vue`/`LocationQuiz.vue`)
+were folded in and removed in Slice 3.
 
 ---
 
@@ -68,10 +69,17 @@ cards from the engine and renders `FlagCard`/`LocationCard`. The throwaway proto
   questions render, correct→self-rate, wrong map tap→forced Again (rating 1, green/red shapes),
   30-card daily cap, full state restored by replay after reload. Prototypes removed.
 
-## Slice 4 — Daily home + streak
+## Slice 4 — Daily home + streak ✅
 **Goal:** the daily-habit entry point.
-- Home: big "Start today" card, today's due count, streak counter; routes into the session.
-- **Done when:** opening the app shows today's load and launches the session.
+- ✅ Home: big "Start today" card, today's due count, streak counter; routes into the session.
+- **Done when:** opening the app shows today's load and launches the session. ✅ —
+  `/` (`src/views/HomeView.vue`) `init`s the store, shows the day's load via
+  `store.plannedCount()` (hero count + `due`/`new` breakdown pills) on a chunky video-game
+  card whose "Start today" button (region hue) routes to `/session`; a 🔥 streak chip reads a
+  new `store.streak` getter backed by `src/engine/streak.ts` (`dailyStreak` = consecutive
+  active local days from the log, alive through yesterday). An "All caught up!" 🌍 rest state
+  shows when the load is 0. Verified in preview (type-check clean): 30-card fresh load, seeded
+  3-day streak + 4 due / 28 new survive reload, Start launches the session.
 
 ## Slice 5 — Onboarding calibration
 **Goal:** a smart first track.

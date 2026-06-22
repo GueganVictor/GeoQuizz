@@ -9,6 +9,7 @@ import { EUROPE } from '@/data'
 
 import { allEvents, appendEvent, clearLog } from '@/engine/db'
 import { replayCard, replayLog } from '@/engine/replay'
+import { dailyStreak } from '@/engine/streak'
 import {
   dueCards,
   firstSeenByCountry,
@@ -122,6 +123,8 @@ export const useSessionStore = defineStore('session', () => {
   const dueCount = computed(() => dueCards(states.value, Date.now()).length)
   const introducedCount = computed(() => states.value.size)
   const newCountTodayUsed = computed(() => introducedToday(Date.now()).size)
+  /** Consecutive-day habit streak for the daily home (Slice 4). */
+  const streak = computed(() => dailyStreak(events.value, Date.now()))
 
   return {
     // state
@@ -132,6 +135,7 @@ export const useSessionStore = defineStore('session', () => {
     dueCount,
     introducedCount,
     newCountTodayUsed,
+    streak,
     // actions
     init,
     nextCard,
