@@ -4,16 +4,18 @@ Ordered vertical slices. Each slice leaves the app working and demoable. Strateg
 get a **playable offline daily loop on the Europe slice first**, then add auth/sync,
 then progress polish + PWA, then scale to the whole world.
 
-> **▶ Current slice: 5 — Onboarding calibration.**
+> **▶ Current slice: 6 — Auth + cloud sync (Supabase).**
 > This is the next slice to build. Update this line whenever a slice is completed — set it to
 > the next slice number/name, or to "✅ all slices complete" when the roadmap is done.
 
 See [DESIGN.md](DESIGN.md) for the agreed architecture (§1–10) and visual design (§11).
 
-Current state: the daily-habit loop is live — `/` (`src/views/HomeView.vue`) shows today's load
-+ streak and launches `/session` (`src/views/SessionView.vue`), which pulls cards from the engine
-and renders `FlagCard`/`LocationCard`. The throwaway prototypes (`FlagQuiz.vue`/`LocationQuiz.vue`)
-were folded in and removed in Slice 3.
+Current state: the daily-habit loop is live with first-run calibration — a new user is routed to
+`/onboarding` (`src/views/OnboardingView.vue`) to triage the Europe deck (seeding FSRS state),
+then `/` (`src/views/HomeView.vue`) shows today's load + streak and launches `/session`
+(`src/views/SessionView.vue`), which pulls cards from the engine and renders
+`FlagCard`/`LocationCard`. The throwaway prototypes (`FlagQuiz.vue`/`LocationQuiz.vue`) were folded
+in and removed in Slice 3.
 
 ---
 
@@ -81,11 +83,23 @@ were folded in and removed in Slice 3.
   shows when the load is 0. Verified in preview (type-check clean): 30-card fresh load, seeded
   3-day streak + 4 due / 28 new survive reload, Start launches the session.
 
-## Slice 5 — Onboarding calibration
+## Slice 5 — Onboarding calibration ✅
 **Goal:** a smart first track.
-- First-run triage over the top-100-by-population (Europe subset for now): combined per-country
-  "Know it / Sort of / No idea" seeding FSRS state (per DESIGN §3).
-- **Done when:** a new user runs the triage once, then the daily loop schedules accordingly.
+- ✅ First-run triage over the Europe deck (all 37 countries; "top-100 subset" = the whole
+  Europe set in v1): combined per-country "Know it / Sort of / No idea" seeding FSRS state
+  (per DESIGN §3).
+- **Done when:** a new user runs the triage once, then the daily loop schedules accordingly. ✅ —
+  `/onboarding` (`src/views/OnboardingView.vue`): a mascot intro → a per-country card (flag +
+  name + region map with the target country lit in the Europe hue) + three plain video-game
+  choice buttons → a 🎉 "You're all set!" hand-off to `/`. Each verdict seeds *both* skill cards
+  via `store.seedCountry` using `src/engine/triage.ts` `triageRating()`: **Know it → Easy**
+  (~8-day interval, won't clog), **Sort of → Hard** (~6 min), **No idea → Again** (~1 min) —
+  "sort of"/"no idea" enter active review immediately (DESIGN §3). First-run is gated by a new
+  `store.needsOnboarding` getter (empty review log); `HomeView` `router.replace`s to it, and the
+  triage is resume-safe (skips countries already seeded via `store.introducedCountryIds`). Bottom
+  nav hides on `/onboarding` (focused mode, like `/session`). Verified in preview (type-check
+  clean): fresh log → redirect → 37 countries seeded (74 triage events) → home shows the
+  calibrated due load (Know-it cards excluded, Again/Hard cards due), survived reload via replay.
 
 ## Slice 6 — Auth + cloud sync (Supabase)
 **Goal:** progress that follows the user across devices.

@@ -10,6 +10,8 @@ const router = createRouter({
     { path: '/profile', name: 'profile', component: () => import('@/views/ProfileView.vue') },
     // The playable daily loop (Slice 3). Focused mode — bottom nav hidden.
     { path: '/session', name: 'session', component: () => import('@/views/SessionView.vue') },
+    // First-run calibration triage (Slice 5). Focused mode — bottom nav hidden.
+    { path: '/onboarding', name: 'onboarding', component: () => import('@/views/OnboardingView.vue') },
     // Slice 0 component showcase — proves the shared UI renders.
     { path: '/demo', name: 'demo', component: () => import('@/views/DemoView.vue') },
   ],

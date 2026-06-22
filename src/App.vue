@@ -4,10 +4,11 @@ import { RouterView, useRoute } from 'vue-router'
 
 import BottomNav from './components/BottomNav.vue'
 
-// A quiz session is a focused mode: hide the bottom tabs so the close button in
-// the quiz chrome is the only way out.
+// A quiz session and the first-run triage are focused modes: hide the bottom tabs
+// so the in-screen controls are the only way out.
 const route = useRoute()
-const showNav = computed(() => route.name !== 'session')
+const FOCUSED = new Set(['session', 'onboarding'])
+const showNav = computed(() => !FOCUSED.has(route.name as string))
 </script>
 
 <template>

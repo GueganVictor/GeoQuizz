@@ -26,6 +26,11 @@ function start() {
 
 onMounted(async () => {
   await session.init()
+  // First run (empty review log): send the user through calibration first (Slice 5).
+  if (session.needsOnboarding) {
+    router.replace('/onboarding')
+    return
+  }
   load.value = session.plannedCount()
   ready.value = true
 })

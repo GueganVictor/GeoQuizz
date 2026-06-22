@@ -125,6 +125,12 @@ export const useSessionStore = defineStore('session', () => {
   const newCountTodayUsed = computed(() => introducedToday(Date.now()).size)
   /** Consecutive-day habit streak for the daily home (Slice 4). */
   const streak = computed(() => dailyStreak(events.value, Date.now()))
+  /** Distinct countries with at least one card introduced (any event). */
+  const introducedCountryIds = computed(
+    () => new Set([...states.value.values()].map((s) => s.ref.countryId)),
+  )
+  /** First-run gate (Slice 5): a fresh log means the calibration triage hasn't run. */
+  const needsOnboarding = computed(() => loaded.value && events.value.length === 0)
 
   return {
     // state
@@ -136,6 +142,8 @@ export const useSessionStore = defineStore('session', () => {
     introducedCount,
     newCountTodayUsed,
     streak,
+    introducedCountryIds,
+    needsOnboarding,
     // actions
     init,
     nextCard,
