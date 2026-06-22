@@ -13,6 +13,7 @@ import {
   dueCards,
   firstSeenByCountry,
   nextCard as pickNextCard,
+  sessionPlanCount,
 } from '@/engine/scheduler'
 import {
   cardId,
@@ -58,6 +59,11 @@ export const useSessionStore = defineStore('session', () => {
   /** The next card to show: earliest due review, else a capped new card (or null). */
   function nextCard(now: number = Date.now()): ScheduledCard | null {
     return pickNextCard(DECK_COUNTRY_IDS, states.value, { now }, introducedToday(now))
+  }
+
+  /** Cards a session starting `now` can serve — the progress denominator (Slice 3). */
+  function plannedCount(now: number = Date.now()): number {
+    return sessionPlanCount(DECK_COUNTRY_IDS, states.value, { now }, introducedToday(now))
   }
 
   /** Re-derive and store a single card's state from its events in the in-memory log. */
@@ -129,6 +135,7 @@ export const useSessionStore = defineStore('session', () => {
     // actions
     init,
     nextCard,
+    plannedCount,
     recordGrade,
     seedCountry,
     reset,

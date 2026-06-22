@@ -121,3 +121,45 @@ export function nextCard(
   const cards = newCountryCards.get(pick)!
   return { ref: cards[0]!, kind: 'new' }
 }
+
+/**
+ * How many cards a session starting "now" can still serve before `nextCard`
+ * returns null — due reviews plus the new cards the daily budget allows. Mirrors
+ * the accounting in `nextCard`; used as the session progress denominator (Slice 3)
+ * and "today's load" on the home screen (Slice 4).
+ *
+ * This is a snapshot estimate: a card answered `Again` mid-session may come due
+ * again and be served beyond this count, so callers should treat it as a target.
+ */
+export function sessionPlanCount(
+  deckCountryIds: number[],
+  states: Map<string, CardState>,
+  config: ScheduleConfig,
+  introducedToday?: Set<number>,
+): number {
+  const { now, newPerDay = NEW_COUNTRIES_PER_DAY } = config
+
+  const due = dueCards(states, now).length
+  const startedToday = introducedToday ?? newCountriesToday(states, now)
+
+  // Second skill of a country already started today is free (no budget spend);
+  // brand-new countries each consume one unit of the daily budget.
+  let freeNew = 0
+  const brandNew = new Map<number, number>()
+  for (const ref of cardsForDeck(deckCountryIds)) {
+    if (states.has(ref.id)) continue
+    if (startedToday.has(ref.countryId)) freeNew++
+    else brandNew.set(ref.countryId, (brandNew.get(ref.countryId) ?? 0) + 1)
+  }
+
+  const budget = Math.max(0, newPerDay - startedToday.size)
+  let newCards = freeNew
+  let taken = 0
+  for (const missing of brandNew.values()) {
+    if (taken >= budget) break
+    newCards += missing
+    taken += 1
+  }
+
+  return due + newCards
+}

@@ -12,8 +12,11 @@ import AppButton from '@/components/AppButton.vue'
     <p class="sub">Learn the world, one country a day.</p>
 
     <div class="cta">
+      <RouterLink to="/session" class="cta__link">
+        <AppButton block>Start session</AppButton>
+      </RouterLink>
       <RouterLink to="/demo" class="cta__link">
-        <AppButton block>Components demo</AppButton>
+        <AppButton block tone="plain">Components demo</AppButton>
       </RouterLink>
     </div>
   </section>
@@ -34,6 +37,11 @@ import AppButton from '@/components/AppButton.vue'
   margin: 0 0 28px;
   font-weight: 700;
   color: #6b6b7a;
+}
+.cta {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
 }
 .cta__link {
   text-decoration: none;

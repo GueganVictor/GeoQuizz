@@ -1,7 +1,13 @@
 <script setup lang="ts">
-import { RouterView } from 'vue-router'
+import { computed } from 'vue'
+import { RouterView, useRoute } from 'vue-router'
 
 import BottomNav from './components/BottomNav.vue'
+
+// A quiz session is a focused mode: hide the bottom tabs so the close button in
+// the quiz chrome is the only way out.
+const route = useRoute()
+const showNav = computed(() => route.name !== 'session')
 </script>
 
 <template>
@@ -10,7 +16,7 @@ import BottomNav from './components/BottomNav.vue'
     <main class="shell__view">
       <RouterView />
     </main>
-    <BottomNav />
+    <BottomNav v-if="showNav" />
   </div>
 </template>
 

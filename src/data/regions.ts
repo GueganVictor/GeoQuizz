@@ -20,7 +20,7 @@ export interface RegionFrame {
  * continents are filled in at Slice 9 when content scales worldwide.
  *
  * The Europe box clips outliers (Svalbard, the Canaries) so the projection frames
- * mainland Europe — proven in the LocationQuiz prototype.
+ * mainland Europe — proven in the location map game.
  */
 export const REGION_FRAMES: Partial<Record<Continent, RegionFrame>> = {
   europe: {

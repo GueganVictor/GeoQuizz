@@ -4,15 +4,15 @@ Ordered vertical slices. Each slice leaves the app working and demoable. Strateg
 get a **playable offline daily loop on the Europe slice first**, then add auth/sync,
 then progress polish + PWA, then scale to the whole world.
 
-> **▶ Current slice: 3 — Quiz session runner (both skills).**
+> **▶ Current slice: 4 — Daily home + streak.**
 > This is the next slice to build. Update this line whenever a slice is completed — set it to
 > the next slice number/name, or to "✅ all slices complete" when the roadmap is done.
 
 See [DESIGN.md](DESIGN.md) for the agreed architecture (§1–10) and visual design (§11).
 
-Current state: two throwaway-ish prototypes exist — `src/components/FlagQuiz.vue` and
-`src/components/LocationQuiz.vue` — proving the look + the map pipeline. They get folded
-into the real session runner in Slice 3.
+Current state: the playable offline loop is live — `/session` (`src/views/SessionView.vue`) pulls
+cards from the engine and renders `FlagCard`/`LocationCard`. The throwaway prototypes
+(`FlagQuiz.vue`/`LocationQuiz.vue`) were folded in and removed in Slice 3.
 
 ---
 
@@ -51,13 +51,22 @@ into the real session runner in Slice 3.
   FSRS step, 15-country daily cap, triage seed, and full state restored by replay after reload.
   A DEV-only `window.__session` handle (main.ts) drives it headlessly until Slice 3 adds UI.
 
-## Slice 3 — Quiz session runner (both skills)
+## Slice 3 — Quiz session runner (both skills) ✅
 **Goal:** the playable loop, offline, end-to-end.
-- Session runner pulls cards from the engine and renders the right view per card type
+- ✅ Session runner pulls cards from the engine and renders the right view per card type
   (flag MC or map tap), folding in the two prototypes.
-- Apply grading rules: correct → self-rate; **wrong map tap / wrong MC → forced Again**.
+- ✅ Apply grading rules: correct → self-rate; **wrong map tap / wrong MC → forced Again**.
   Write each answer to the review log.
-- **Done when:** you can play a full Europe session offline and progress persists.
+- **Done when:** you can play a full Europe session offline and progress persists. ✅ —
+  `/session` (`src/views/SessionView.vue`) orchestrates: `init`s the store, snapshots a session
+  plan (`scheduler.sessionPlanCount` → progress denominator), then loops `store.nextCard()`.
+  `FlagCard.vue` (flag hero + 2×2 name cards) and `LocationCard.vue` (region map, exact-shape
+  hit-test) are controlled single-question components that emit the objective result; the runner
+  drives the `ResultSheet` — self-rate (Again/Hard/Good/Easy) on a hit, forced `Again` + Continue
+  on a miss — and writes every answer via `recordGrade`. Bottom nav hides on `/session`; a 🌍
+  mascot "Done for today!" screen shows when the queue empties. Verified in-browser: flag/map
+  questions render, correct→self-rate, wrong map tap→forced Again (rating 1, green/red shapes),
+  30-card daily cap, full state restored by replay after reload. Prototypes removed.
 
 ## Slice 4 — Daily home + streak
 **Goal:** the daily-habit entry point.
