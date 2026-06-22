@@ -4,7 +4,7 @@ Ordered vertical slices. Each slice leaves the app working and demoable. Strateg
 get a **playable offline daily loop on the Europe slice first**, then add auth/sync,
 then progress polish + PWA, then scale to the whole world.
 
-> **▶ Current slice: 8 — PWA + juice.**
+> **▶ Current slice: 9 — Scale beyond Europe.**
 > This is the next slice to build. Update this line whenever a slice is completed — set it to
 > the next slice number/name, or to "✅ all slices complete" when the roadmap is done.
 
@@ -140,11 +140,23 @@ in and removed in Slice 3.
   (4 mastered, learning/strong tiers distinct), stats read 88% accuracy / 95% retention /
   Flags 90% / Map 86%, heatmap lit the seeded recent days; then reset local log to empty.
 
-## Slice 8 — PWA + juice
+## Slice 8 — PWA + juice ✅
 **Goal:** installable, offline, polished daily-habit app.
-- Manifest + service worker; cache flag images on first view for offline play.
-- Sound + haptics (on by default + toggle); motion polish on answers/streaks; mascot moments.
-- **Done when:** installs to home screen and a full session works with no network.
+- ✅ Manifest + service worker; cache flag images on first view for offline play.
+- ✅ Sound + haptics (on by default + toggle); motion polish on answers/streaks; mascot moments.
+- **Done when:** installs to home screen and a full session works with no network. ✅ —
+  `vite-plugin-pwa` (Workbox `generateSW`, `registerType:'autoUpdate'`): `manifest.webmanifest`
+  (standalone, Europe-blue theme, 192/512 + maskable icons), app shell **precached** (30 entries) +
+  runtime caching — **flagcdn images CacheFirst on first view** (DESIGN §6) and Google Fonts. Icons
+  are a smiling-globe mascot on Europe blue, authored as `scripts/icon.svg` and rasterized to
+  `public/pwa-*.png` + `apple-touch-icon.png`. Juice: synthesized **Web Audio** SFX (no assets —
+  rising ding / low buzz / fanfare arpeggio) + `navigator.vibrate` haptics in `src/lib/feedback.ts`,
+  gated by a new `src/stores/settings.ts` (`sound`/`haptics`, **on by default**, localStorage-persisted,
+  NOT synced) with video-game pill toggles in `ProfileView`; SFX wired into `SessionView`
+  (correct/wrong/finish). Motion polish (all `prefers-reduced-motion`-guarded): done-screen mascot
+  pop, `ResultSheet` badge pop, `QuizChrome` streak-flame bump, toggle-knob slide. Verified in
+  preview + prod build: SW registered & controlling, manifest/icons served, flag image cached on
+  view, both grading paths fire SFX with no console errors, toggle flips + persists.
 
 ## Slice 9 — Scale beyond Europe
 **Goal:** whole-world content.

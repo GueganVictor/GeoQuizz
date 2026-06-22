@@ -1,6 +1,8 @@
 <script setup lang="ts">
+import { ref, watch } from 'vue'
+
 // Top chrome for a quiz session: close button, progress track, streak counter.
-withDefaults(
+const props = withDefaults(
   defineProps<{
     progress: number // 0–100
     streak: number
@@ -9,6 +11,18 @@ withDefaults(
 )
 
 defineEmits<{ close: [] }>()
+
+// Juice (DESIGN §11): bump the flame each time the streak climbs.
+const bump = ref(false)
+watch(
+  () => props.streak,
+  (next, prev) => {
+    if (next > prev) {
+      bump.value = false
+      requestAnimationFrame(() => (bump.value = true))
+    }
+  },
+)
 </script>
 
 <template>
@@ -17,7 +31,7 @@ defineEmits<{ close: [] }>()
     <div class="track">
       <div class="track__fill" :style="{ width: progress + '%' }" />
     </div>
-    <div class="streak">🔥 {{ streak }}</div>
+    <div class="streak" :class="{ 'streak--bump': bump }">🔥 {{ streak }}</div>
   </header>
 </template>
 
@@ -53,5 +67,25 @@ defineEmits<{ close: [] }>()
   font-weight: 800;
   font-size: 15px;
   color: #ff9f1c;
+  transform-origin: center;
+}
+.streak--bump {
+  animation: streak-bump 0.4s cubic-bezier(0.22, 1.4, 0.4, 1);
+}
+@keyframes streak-bump {
+  0% {
+    transform: scale(1);
+  }
+  45% {
+    transform: scale(1.45);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .streak--bump {
+    animation: none;
+  }
 }
 </style>

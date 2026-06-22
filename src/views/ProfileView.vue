@@ -3,13 +3,16 @@ import { computed, ref } from 'vue'
 
 import AppButton from '@/components/AppButton.vue'
 import { useAuthStore } from '@/stores/auth'
+import { useSettingsStore } from '@/stores/settings'
 import { useSyncStore } from '@/stores/sync'
 
 // Account surface (Slice 6): email magic-link sign-in and cloud-sync status.
 // Signing in on another device pulls + replays the same log → identical state.
+// Plus device preferences (Slice 8): sound + haptics toggles (DESIGN §11).
 
 const auth = useAuthStore()
 const sync = useSyncStore()
+const settings = useSettingsStore()
 
 const emailInput = ref('')
 const sending = ref(false)
@@ -99,6 +102,37 @@ async function signOut() {
       <AppButton block tone="region" :disabled="!validEmail || sending" @click="sendLink">
         {{ sending ? 'Sending…' : 'Send magic link' }}
       </AppButton>
+    </div>
+
+    <!-- Device preferences (Slice 8): sound + haptics, on by default. -->
+    <div class="card card--settings">
+      <h2 class="card__title card__title--left">Settings</h2>
+      <div class="row">
+        <span class="row__label"><span class="row__emoji">🔊</span> Sound</span>
+        <button
+          class="toggle"
+          :class="{ 'toggle--on': settings.sound }"
+          role="switch"
+          :aria-checked="settings.sound"
+          aria-label="Sound effects"
+          @click="settings.toggleSound()"
+        >
+          <span class="toggle__knob" />
+        </button>
+      </div>
+      <div class="row">
+        <span class="row__label"><span class="row__emoji">📳</span> Haptics</span>
+        <button
+          class="toggle"
+          :class="{ 'toggle--on': settings.haptics }"
+          role="switch"
+          :aria-checked="settings.haptics"
+          aria-label="Haptic feedback"
+          @click="settings.toggleHaptics()"
+        >
+          <span class="toggle__knob" />
+        </button>
+      </div>
     </div>
   </section>
 </template>
@@ -212,5 +246,70 @@ async function signOut() {
   font-weight: 700;
   font-size: 14px;
   color: var(--color-wrong);
+}
+
+/* Settings card */
+.card--settings {
+  text-align: left;
+  padding: 22px 22px 12px;
+}
+.card__title--left {
+  text-align: left;
+  margin: 0 0 14px;
+}
+.row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 0;
+  border-top: 2px solid #f0f0f5;
+}
+.row:first-of-type {
+  border-top: none;
+}
+.row__label {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 18px;
+  color: #2b2b3a;
+}
+.row__emoji {
+  margin-right: 6px;
+}
+
+/* Video-game pill toggle: dark outline, knob slides + fill flips to green on. */
+.toggle {
+  position: relative;
+  width: 60px;
+  height: 34px;
+  border: 3px solid #222a33;
+  border-radius: 999px;
+  background: #e3e3ec;
+  cursor: pointer;
+  padding: 0;
+  transition: background 0.18s ease;
+}
+.toggle--on {
+  background: var(--color-correct);
+}
+.toggle__knob {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 24px;
+  height: 24px;
+  border-radius: 999px;
+  background: #fff;
+  border: 2px solid #222a33;
+  box-shadow: 0 2px 0 rgba(34, 42, 51, 0.2);
+  transition: transform 0.18s cubic-bezier(0.22, 1.4, 0.4, 1);
+}
+.toggle--on .toggle__knob {
+  transform: translateX(26px);
+}
+@media (prefers-reduced-motion: reduce) {
+  .toggle__knob {
+    transition: none;
+  }
 }
 </style>

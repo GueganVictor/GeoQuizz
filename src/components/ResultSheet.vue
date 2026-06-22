@@ -60,6 +60,26 @@ withDefaults(
   color: #fff;
   box-shadow: 0 3px 0 rgba(34, 42, 51, 0.2);
 }
+/* Badge pops in when the sheet arrives (juice — DESIGN §11). */
+.sheet__icon {
+  animation: badge-pop 0.4s cubic-bezier(0.22, 1.4, 0.4, 1) both;
+}
+@keyframes badge-pop {
+  0% {
+    transform: scale(0);
+  }
+  65% {
+    transform: scale(1.25);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .sheet__icon {
+    animation: none;
+  }
+}
 .sheet__icon--ok {
   background: var(--color-correct);
 }

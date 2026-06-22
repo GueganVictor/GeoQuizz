@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <!-- Full-bleed Europe-hue background (maskable-safe) -->
+  <rect width="512" height="512" fill="#2ea7ff"/>
+  <!-- Smiling-globe mascot, centered in the maskable safe zone -->
+  <g transform="translate(256 248)">
+    <circle r="150" fill="#ffffff"/>
+    <g fill="none" stroke="#2ea7ff" stroke-width="14" stroke-linecap="round">
+      <!-- equator + meridians -->
+      <line x1="-150" y1="0" x2="150" y2="0"/>
+      <ellipse rx="60" ry="150"/>
+      <ellipse rx="125" ry="150"/>
+    </g>
+    <!-- smiling eyes + mouth -->
+    <g fill="#222a33">
+      <circle cx="-52" cy="-34" r="15"/>
+      <circle cx="52" cy="-34" r="15"/>
+    </g>
+    <path d="M -58 38 Q 0 92 58 38" fill="none" stroke="#222a33" stroke-width="16" stroke-linecap="round"/>
+  </g>
+</svg>

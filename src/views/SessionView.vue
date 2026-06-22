@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 
 import AppButton from '@/components/AppButton.vue'
@@ -9,6 +9,7 @@ import QuizChrome from '@/components/QuizChrome.vue'
 import ResultSheet from '@/components/ResultSheet.vue'
 import { EUROPE } from '@/data'
 import type { Country } from '@/data'
+import { playCorrect, playFanfare, playWrong } from '@/lib/feedback'
 import { Rating } from '@/engine/types'
 import { useSessionStore } from '@/stores/session'
 import type { ScheduledCard } from '@/stores/session'
@@ -81,7 +82,15 @@ function onAnswered(correct: boolean) {
   lastCorrect.value = correct
   revealed.value = true
   streak.value = correct ? streak.value + 1 : 0
+  // Juice (DESIGN §11): SFX + haptics on every objective result.
+  if (correct) playCorrect()
+  else playWrong()
 }
+
+// Mascot celebration moment: a fanfare when the day's queue empties.
+watch(finished, (done) => {
+  if (done) playFanfare()
+})
 
 /** Record the grade for the current card, then move on. */
 async function grade(rating: Rating) {
@@ -177,6 +186,23 @@ onMounted(async () => {
   font-size: 96px;
   line-height: 1;
   margin-bottom: 8px;
+  animation: globe-pop 0.6s cubic-bezier(0.22, 1.4, 0.4, 1) both;
+}
+@keyframes globe-pop {
+  0% {
+    transform: scale(0) rotate(-25deg);
+  }
+  60% {
+    transform: scale(1.15) rotate(8deg);
+  }
+  100% {
+    transform: scale(1) rotate(0);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .globe {
+    animation: none;
+  }
 }
 .done__title {
   font-family: var(--font-display);
