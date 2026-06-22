@@ -2,7 +2,7 @@
 import { computed, ref } from 'vue'
 
 import AppButton from '@/components/AppButton.vue'
-import { REGION_FRAMES, shapesForContinent } from '@/data'
+import { contextForContinent, REGION_FRAMES, shapesForContinent } from '@/data'
 import type { Country } from '@/data'
 
 // One "tap the country" question over the region map (DESIGN §5). Grading is an
@@ -22,6 +22,8 @@ const emit = defineEmits<{ answered: [correct: boolean] }>()
 // The continent's deck is the tappable field; projection precomputed in the catalog.
 const frame = computed(() => REGION_FRAMES[props.country.continent])
 const shapes = computed(() => shapesForContinent(props.country.continent))
+// The rest of the world around the region, drawn greyed + non-interactive for context.
+const context = computed(() => contextForContinent(props.country.continent))
 
 const tapped = ref<number | null>(null)
 const revealed = ref(false)
@@ -176,6 +178,9 @@ function resetZoom() {
           @pointercancel="onPointerUp"
         >
           <g :transform="transform">
+            <!-- Surrounding world (context only — not part of the answer set) -->
+            <path v-for="s in context" :key="`ctx-${s.id}`" :d="s.d" class="context" />
+            <!-- The region's countries: the tappable answer field -->
             <path
               v-for="s in shapes"
               :key="s.id"
@@ -237,8 +242,16 @@ function resetZoom() {
   display: block;
   touch-action: none;
 }
+/* Surrounding world: recedes behind the playable region (paler, faint outline). */
+.context {
+  fill: #f1f2f6;
+  stroke: #c8ccd6;
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+  pointer-events: none;
+}
 .country {
-  fill: #e7e9f0;
+  fill: #dbdee8;
   stroke: #222a33;
   stroke-width: 1;
   vector-effect: non-scaling-stroke;

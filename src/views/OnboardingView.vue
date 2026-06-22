@@ -3,7 +3,7 @@ import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 
 import AppButton from '@/components/AppButton.vue'
-import { REGION_FRAMES, WORLD, flagUrl, shapesForContinent } from '@/data'
+import { contextForContinent, REGION_FRAMES, WORLD, flagUrl, shapesForContinent } from '@/data'
 import type { Country } from '@/data'
 import { TRIAGE_CHOICES, triageRating, type TriageVerdict } from '@/engine/triage'
 import { useSessionStore } from '@/stores/session'
@@ -36,6 +36,7 @@ const current = computed<Country | null>(() => queue.value[index.value] ?? null)
 // Each card adopts its country's continent frame, shapes and hue (DESIGN §11).
 const frame = computed(() => (current.value ? REGION_FRAMES[current.value.continent] : null))
 const shapes = computed(() => (current.value ? shapesForContinent(current.value.continent) : []))
+const context = computed(() => (current.value ? contextForContinent(current.value.continent) : []))
 const regionStyle = computed(() =>
   current.value ? `--region: var(--color-${current.value.continent})` : '',
 )
@@ -103,6 +104,7 @@ onMounted(async () => {
 
         <div class="mapcard">
           <svg class="map" :viewBox="`0 0 ${frame?.width ?? 0} ${frame?.height ?? 0}`" role="img">
+            <path v-for="s in context" :key="`ctx-${s.id}`" :d="s.d" class="context" />
             <path
               v-for="s in shapes"
               :key="s.id"
@@ -243,8 +245,14 @@ onMounted(async () => {
   display: block;
   max-height: 230px;
 }
+.context {
+  fill: #f1f2f6;
+  stroke: #c8ccd6;
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+}
 .country {
-  fill: #e7e9f0;
+  fill: #dbdee8;
   stroke: #222a33;
   stroke-width: 1;
   vector-effect: non-scaling-stroke;

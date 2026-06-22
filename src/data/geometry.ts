@@ -33,14 +33,8 @@ export interface CountryShape {
   d: string
 }
 
-/**
- * Project the given country ids into a region frame and return one SVG path each.
- *
- * A single Mercator projection is fit to the frame's lon/lat box (`fitExtent`), so
- * every shape shares the same projection — this is what makes neighbouring
- * countries hit-testable against each other on the region map (DESIGN §5).
- */
-export function regionShapes(ids: number[], frame: RegionFrame): CountryShape[] {
+/** Build the path generator for a frame: one Mercator fit to the frame's lon/lat box. */
+function pathGenFor(frame: RegionFrame) {
   const [[west, south], [east, north]] = frame.bounds
   const box: Feature<Geometry> = {
     type: 'Feature',
@@ -66,10 +60,43 @@ export function regionShapes(ids: number[], frame: RegionFrame): CountryShape[] 
     ],
     box,
   )
-  const pathGen = geoPath(projection)
+  return geoPath(projection)
+}
 
+/**
+ * Project the given country ids into a region frame and return one SVG path each.
+ *
+ * A single Mercator projection is fit to the frame's lon/lat box (`fitExtent`), so
+ * every shape shares the same projection — this is what makes neighbouring
+ * countries hit-testable against each other on the region map (DESIGN §5).
+ */
+export function regionShapes(ids: number[], frame: RegionFrame): CountryShape[] {
+  const pathGen = pathGenFor(frame)
   return ids.map((id) => {
     const f = featureById.get(id)
     return { id, d: f ? pathGen(f) ?? '' : '' }
   })
+}
+
+/**
+ * Every *other* atlas country that falls inside a region frame — the surrounding
+ * world drawn as non-interactive context behind the region's own deck. Uses the
+ * same projection as `regionShapes`, excludes the deck ids (drawn separately), and
+ * culls features whose projected bounds fall entirely outside the viewBox.
+ */
+export function contextShapes(frame: RegionFrame, excludeIds: Iterable<number>): CountryShape[] {
+  const exclude = new Set<number>([...excludeIds])
+  const pathGen = pathGenFor(frame)
+  const out: CountryShape[] = []
+  for (const f of allFeatures) {
+    const id = Number(f.id)
+    if (exclude.has(id)) continue
+    const d = pathGen(f)
+    if (!d) continue
+    const [[x0, y0], [x1, y1]] = pathGen.bounds(f)
+    // Skip anything fully off-frame (overflow clips the rest at the edges).
+    if (x1 < 0 || y1 < 0 || x0 > frame.width || y0 > frame.height) continue
+    out.push({ id, d })
+  }
+  return out
 }

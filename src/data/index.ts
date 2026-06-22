@@ -2,7 +2,7 @@
 // each country a flag URL (flagUrl) and a region map path (per-continent SHAPES).
 
 import { DECKS_BY_CONTINENT, WORLD } from './countries'
-import { regionShapes, type CountryShape } from './geometry'
+import { contextShapes, regionShapes, type CountryShape } from './geometry'
 import { REGION_FRAMES } from './regions'
 import { CONTINENTS, type Continent, type Country } from './types'
 
@@ -54,6 +54,24 @@ export const SHAPES_BY_CONTINENT: Record<Continent, CountryShape[]> = Object.fro
 /** Region map paths for one continent (the tappable field for its location cards). */
 export function shapesForContinent(continent: Continent): CountryShape[] {
   return SHAPES_BY_CONTINENT[continent]
+}
+
+/**
+ * Surrounding-world context paths for a continent — every *other* country that falls
+ * inside its frame, drawn greyed behind the deck so the region reads in world context.
+ * Lazily computed (it projects the whole atlas per frame) and memoized.
+ */
+const contextCache = new Map<Continent, CountryShape[]>()
+export function contextForContinent(continent: Continent): CountryShape[] {
+  let shapes = contextCache.get(continent)
+  if (!shapes) {
+    shapes = contextShapes(
+      REGION_FRAMES[continent],
+      DECKS[continent].map((c) => c.id),
+    )
+    contextCache.set(continent, shapes)
+  }
+  return shapes
 }
 
 /** Precomputed Europe map paths (kept for the v1 demo + back-compat). */

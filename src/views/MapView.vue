@@ -1,7 +1,14 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
 
-import { CONTINENTS, DECKS, REGION_FRAMES, shapesForContinent, type Continent } from '@/data'
+import {
+  CONTINENTS,
+  contextForContinent,
+  DECKS,
+  REGION_FRAMES,
+  shapesForContinent,
+  type Continent,
+} from '@/data'
 import {
   activityByDay,
   avgRetention,
@@ -45,6 +52,7 @@ const sections = computed(() =>
       label: CONTINENT_LABELS[continent],
       frame: REGION_FRAMES[continent],
       shapes: shapesForContinent(continent),
+      context: contextForContinent(continent),
       mastery,
       summary: masterySummary(mastery, deck.length),
       accuracy: regionAccuracy(events),
@@ -141,6 +149,7 @@ onMounted(async () => {
           role="img"
           :aria-label="`${sec.label} mastery map`"
         >
+          <path v-for="s in sec.context" :key="`ctx-${s.id}`" :d="s.d" class="context" />
           <path
             v-for="s in sec.shapes"
             :key="s.id"
@@ -256,6 +265,12 @@ onMounted(async () => {
 .map {
   width: 100%;
   display: block;
+}
+.context {
+  fill: #f1f2f6;
+  stroke: #c8ccd6;
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
 }
 .country {
   stroke: #222a33;
