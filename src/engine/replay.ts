@@ -15,10 +15,14 @@ function refFromId(cardId: string): CardRef {
 
 /**
  * Fold a card's events (in chronological order) into its current FSRS state.
- * Events are sorted by timestamp, then by write order (`seq`) as a stable tiebreak.
+ * Events are sorted by timestamp, then by `uid` as a stable tiebreak. The tiebreak
+ * is the device-independent `uid` (not the local `seq`) so two devices that pulled
+ * the same log replay it in identical order (DESIGN §7, Slice 6).
  */
 export function replayCard(cardId: string, events: ReviewEvent[]): CardState {
-  const ordered = [...events].sort((a, b) => a.ts - b.ts || (a.seq ?? 0) - (b.seq ?? 0))
+  const ordered = [...events].sort(
+    (a, b) => a.ts - b.ts || (a.uid < b.uid ? -1 : a.uid > b.uid ? 1 : 0),
+  )
   const first = ordered[0]
   let card = createEmptyCard(first ? new Date(first.ts) : new Date())
   let lastReviewedAt: number | undefined

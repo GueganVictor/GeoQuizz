@@ -25,7 +25,14 @@ export interface CardRef {
  * sync conflict-free and doubles as full history for stats.
  */
 export interface ReviewEvent {
-  /** IndexedDB autoincrement key; assigned on write, defines append order. */
+  /**
+   * Globally-unique id (crypto.randomUUID), generated when the event is created.
+   * The cross-device dedup key (Slice 6): the same event keeps one `uid` whether
+   * it lives in IndexedDB or Supabase, so pulling a device's log and merging it
+   * never double-counts. Distinct from `seq`, which is device-local write order.
+   */
+  uid: string
+  /** IndexedDB autoincrement key; assigned on write, defines local append order. */
   seq?: number
   cardId: string
   countryId: number

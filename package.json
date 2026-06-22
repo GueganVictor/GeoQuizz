@@ -16,6 +16,7 @@
   },
   "dependencies": {
     "@iconify/vue": "^5.0.0",
+    "@supabase/supabase-js": "^2.108.2",
     "d3-geo": "^3.1.1",
     "pinia": "^3.0.4",
     "topojson-client": "^3.1.0",

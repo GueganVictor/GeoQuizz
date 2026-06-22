@@ -4,7 +4,7 @@ Ordered vertical slices. Each slice leaves the app working and demoable. Strateg
 get a **playable offline daily loop on the Europe slice first**, then add auth/sync,
 then progress polish + PWA, then scale to the whole world.
 
-> **▶ Current slice: 6 — Auth + cloud sync (Supabase).**
+> **▶ Current slice: 7 — Progress views.**
 > This is the next slice to build. Update this line whenever a slice is completed — set it to
 > the next slice number/name, or to "✅ all slices complete" when the roadmap is done.
 
@@ -101,11 +101,25 @@ in and removed in Slice 3.
   clean): fresh log → redirect → 37 countries seeded (74 triage events) → home shows the
   calibrated due load (Know-it cards excluded, Again/Hard cards due), survived reload via replay.
 
-## Slice 6 — Auth + cloud sync (Supabase)
+## Slice 6 — Auth + cloud sync (Supabase) ✅
 **Goal:** progress that follows the user across devices.
-- Email magic-link auth; Supabase schema (review-log table) + row-level security.
-- Local-first sync: push the IndexedDB log on reconnect, pull + replay on another device.
-- **Done when:** logging in on a second device reconstructs identical card state.
+- ✅ Email magic-link auth; Supabase schema (review-log table) + row-level security.
+- ✅ Local-first sync: push the IndexedDB log on reconnect, pull + replay on another device.
+- **Done when:** logging in on a second device reconstructs identical card state. ✅ —
+  `@supabase/supabase-js` client (`src/lib/supabase.ts`, env-gated: app stays fully local-first
+  when unconfigured). SQL migration `supabase/migrations/0001_review_log.sql` = `review_log`
+  table keyed by a client UUID, with **append-only RLS** (select + insert own rows only; no
+  update/delete). Each `ReviewEvent` now carries a globally-unique `uid` (`crypto.randomUUID`),
+  the cross-device dedup key; replay tiebreaks on `uid` not the device-local `seq`, so two
+  devices replay in identical order. IndexedDB bumped to v2 (uid unique index + backfill);
+  `db.mergeEvents` inserts pulled events skipping held uids. `src/engine/sync.ts` push (idempotent
+  upsert on uid) / pull (ordered by ts). `src/stores/auth.ts` (magic-link sign-in/out) +
+  `src/stores/sync.ts` (full sync on sign-in/reconnect, debounced push on new events); both wired
+  at startup in `App.vue`. `ProfileView.vue` = sign-in / magic-link-sent / synced / offline states.
+  Verified: client picks up creds, table+RLS live (anon read = []), `signInWithOtp` dispatches
+  email; and the merge/replay core simulated two-device against real IndexedDB — fresh device pulls
+  6-event log → **identical** FSRS state, re-pull adds 0 (uid dedup), shuffled merge order →
+  identical state. Live authenticated upsert/select taken on trust (magic-link click not automatable).
 
 ## Slice 7 — Progress views
 **Goal:** the "track my progress" surface (DESIGN §8).

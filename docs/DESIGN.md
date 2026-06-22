@@ -75,6 +75,12 @@ Status: design agreed, pre-implementation. v1 target = full loop, Europe slice f
   derived by replaying events in timestamp order** — conflict-free across devices and doubles
   as full history for stats.
 - Triage ratings are the **first log events**.
+- **Cross-device dedup key (Slice 6):** every event carries a client-generated `uid`
+  (`crypto.randomUUID`), stable across IndexedDB and Supabase. Push is an idempotent upsert on
+  `uid`; pull skips uids already held locally. Replay tiebreaks equal-`ts` events on `uid` (not
+  the device-local autoincrement `seq`) so every device replays in identical order. The Supabase
+  `review_log` table is keyed by `uid` with **append-only RLS** — select + insert of own rows
+  only, no update/delete — enforcing immutability at the database layer.
 
 ## 8. Progress tracking (v1 — all of the following)
 

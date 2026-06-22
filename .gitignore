@@ -40,3 +40,8 @@ __screenshots__/
 
 # Misc
 .DS_Store
+
+# Local secrets (Supabase credentials) — Slice 6
+.env
+.env.*
+!.env.example

@@ -1,14 +1,25 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, onMounted } from 'vue'
 import { RouterView, useRoute } from 'vue-router'
 
 import BottomNav from './components/BottomNav.vue'
+import { useAuthStore } from './stores/auth'
+import { useSessionStore } from './stores/session'
+import { useSyncStore } from './stores/sync'
 
 // A quiz session and the first-run triage are focused modes: hide the bottom tabs
 // so the in-screen controls are the only way out.
 const route = useRoute()
 const FOCUSED = new Set(['session', 'onboarding'])
 const showNav = computed(() => !FOCUSED.has(route.name as string))
+
+// Startup (Slice 6): load the local log, restore any auth session, then arm cloud
+// sync. Sync is inert unless Supabase is configured and a user is signed in.
+onMounted(async () => {
+  await useSessionStore().init()
+  await useAuthStore().init()
+  useSyncStore().start()
+})
 </script>
 
 <template>

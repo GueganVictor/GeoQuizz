@@ -7,7 +7,7 @@ import { ref, computed } from 'vue'
 
 import { EUROPE } from '@/data'
 
-import { allEvents, appendEvent, clearLog } from '@/engine/db'
+import { allEvents, appendEvent, clearLog, mergeEvents } from '@/engine/db'
 import { replayCard, replayLog } from '@/engine/replay'
 import { dailyStreak } from '@/engine/streak'
 import {
@@ -43,6 +43,25 @@ export const useSessionStore = defineStore('session', () => {
     events.value = await allEvents()
     states.value = replayLog(events.value)
     loaded.value = true
+  }
+
+  /** Re-read the persisted log and rebuild all state (after a cloud pull merges in). */
+  async function reload(): Promise<void> {
+    events.value = await allEvents()
+    states.value = replayLog(events.value)
+    loaded.value = true
+  }
+
+  /**
+   * Merge pulled remote events (Slice 6): persist any new uids, fold them into the
+   * in-memory log, and rebuild state by replay. Returns how many were new.
+   */
+  async function mergeRemote(incoming: ReviewEvent[]): Promise<number> {
+    const inserted = await mergeEvents(incoming)
+    if (inserted.length === 0) return 0
+    events.value = [...events.value, ...inserted]
+    states.value = replayLog(events.value)
+    return inserted.length
   }
 
   /** Distinct countries first introduced today — the new-card budget spend. */
@@ -85,6 +104,7 @@ export const useSessionStore = defineStore('session', () => {
     opts: { now?: number; via?: ReviewEvent['via'] } = {},
   ): Promise<void> {
     const event: ReviewEvent = {
+      uid: crypto.randomUUID(),
       cardId: ref.id,
       countryId: ref.countryId,
       skill: ref.skill,
@@ -146,6 +166,8 @@ export const useSessionStore = defineStore('session', () => {
     needsOnboarding,
     // actions
     init,
+    reload,
+    mergeRemote,
     nextCard,
     plannedCount,
     recordGrade,
