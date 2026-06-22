@@ -1,21 +1,38 @@
-// Country catalog module (Slice 1). Exposes the Europe deck plus, for each
-// country, a flag URL (flagUrl) and a map path (EUROPE_SHAPES / shapesFor).
+// Country catalog module. Exposes the worldwide deck (split per continent), and for
+// each country a flag URL (flagUrl) and a region map path (per-continent SHAPES).
 
-import { EUROPE } from './countries'
+import { DECKS_BY_CONTINENT, WORLD } from './countries'
 import { regionShapes, type CountryShape } from './geometry'
 import { REGION_FRAMES } from './regions'
-import type { Continent, Country } from './types'
+import { CONTINENTS, type Continent, type Country } from './types'
 
 export type { Continent, Country } from './types'
 export type { RegionFrame } from './regions'
 export type { CountryShape } from './geometry'
-export { EUROPE, flagUrl } from './countries'
+export { CONTINENTS } from './types'
+export {
+  EUROPE,
+  ASIA,
+  AFRICA,
+  NAMERICA,
+  SAMERICA,
+  OCEANIA,
+  WORLD,
+  DECKS_BY_CONTINENT,
+  flagUrl,
+} from './countries'
 export { REGION_FRAMES } from './regions'
 export { regionShapes } from './geometry'
 
-/** Decks by continent. Only Europe is populated in v1 (DESIGN §9). */
-export const DECKS: Partial<Record<Continent, Country[]>> = {
-  europe: EUROPE,
+/** Decks by continent — every continent populated (DESIGN §9). */
+export const DECKS: Record<Continent, Country[]> = DECKS_BY_CONTINENT
+
+/** Country lookup by ISO numeric id, across the whole world. */
+export const COUNTRY_BY_ID: Map<number, Country> = new Map(WORLD.map((c) => [c.id, c]))
+
+/** The continent a country belongs to (its color + map frame), or undefined if unknown. */
+export function continentOf(countryId: number): Continent | undefined {
+  return COUNTRY_BY_ID.get(countryId)?.continent
 }
 
 /**
@@ -23,13 +40,21 @@ export const DECKS: Partial<Record<Continent, Country[]>> = {
  * "map path for each" half of the catalog (the flag half is `flagUrl`).
  */
 export function shapesFor(deck: Country[], continent: Continent): CountryShape[] {
-  const frame = REGION_FRAMES[continent]
-  if (!frame) throw new Error(`No region frame for continent: ${continent}`)
   return regionShapes(
     deck.map((c) => c.id),
-    frame,
+    REGION_FRAMES[continent],
   )
 }
 
-/** Precomputed Europe map paths, one per deck country. */
-export const EUROPE_SHAPES: CountryShape[] = shapesFor(EUROPE, 'europe')
+/** Precomputed region map paths per continent, one entry per deck country. */
+export const SHAPES_BY_CONTINENT: Record<Continent, CountryShape[]> = Object.fromEntries(
+  CONTINENTS.map((c) => [c, shapesFor(DECKS[c], c)]),
+) as Record<Continent, CountryShape[]>
+
+/** Region map paths for one continent (the tappable field for its location cards). */
+export function shapesForContinent(continent: Continent): CountryShape[] {
+  return SHAPES_BY_CONTINENT[continent]
+}
+
+/** Precomputed Europe map paths (kept for the v1 demo + back-compat). */
+export const EUROPE_SHAPES: CountryShape[] = SHAPES_BY_CONTINENT.europe

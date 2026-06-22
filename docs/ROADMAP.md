@@ -4,9 +4,10 @@ Ordered vertical slices. Each slice leaves the app working and demoable. Strateg
 get a **playable offline daily loop on the Europe slice first**, then add auth/sync,
 then progress polish + PWA, then scale to the whole world.
 
-> **▶ Current slice: 9 — Scale beyond Europe.**
-> This is the next slice to build. Update this line whenever a slice is completed — set it to
-> the next slice number/name, or to "✅ all slices complete" when the roadmap is done.
+> **▶ Current slice: ✅ all slices complete.**
+> The roadmap is done — the full daily-habit loop ships worldwide (all six continents). Update
+> this line whenever a slice is completed — set it to the next slice number/name, or to
+> "✅ all slices complete" when the roadmap is done.
 
 See [DESIGN.md](DESIGN.md) for the agreed architecture (§1–10) and visual design (§11).
 
@@ -158,11 +159,34 @@ in and removed in Slice 3.
   preview + prod build: SW registered & controlling, manifest/icons served, flag image cached on
   view, both grading paths fire SFX with no console errors, toggle flips + persists.
 
-## Slice 9 — Scale beyond Europe
+## Slice 9 — Scale beyond Europe ✅
 **Goal:** whole-world content.
-- Per-continent map frames/projections + full country dataset; continent color system applied
+- ✅ Per-continent map frames/projections + full country dataset; continent color system applied
   across decks, mastery map, and stats.
-- **Done when:** all six continents are playable and color-coded.
+- **Done when:** all six continents are playable and color-coded. ✅ —
+  `src/data/countries.ts` now holds the **worldwide deck** (195 sovereign states incl.
+  microstates, split into per-continent arrays `EUROPE`/`ASIA`/`AFRICA`/`NAMERICA`/`SAMERICA`/
+  `OCEANIA` + `WORLD`); every id verified to resolve to non-empty world-atlas geometry. Roster
+  was user-chosen "all-inclusive ~197 states"; transcontinental countries bucketed for
+  map-framing sanity (**Russia/Turkey/Caucasus/Kazakhstan → Asia**, Cyprus → Europe, Egypt →
+  Africa). `regions.ts` `REGION_FRAMES` is now a full `Record<Continent, RegionFrame>` (six
+  lon/lat boxes; big countries clip at the edges and stay tappable). `data/index.ts` exposes
+  `DECKS`, `COUNTRY_BY_ID`, `continentOf`, precomputed `SHAPES_BY_CONTINENT` +
+  `shapesForContinent`. `geometry.ts` `featureById` switched to **first-wins** (handles the
+  id-36 Australia/Ashmore collision). Session store deck = `WORLD`; onboarding triage = **top
+  100 by population worldwide** (was the 37 Europe); flag-MC distractors are now **same-continent**
+  (top up from world if a continent is small). Each in-session screen + onboarding card adopts
+  its country's continent hue (`--region`) and the **right continent map frame** per card.
+  `LocationCard` gained **pinch / scroll / button zoom + drag-pan** (`MAX_SCALE` 40, focal-point
+  zoom, pan-clamped to the frame), so even Monaco/Vatican are tappable via exact-shape hit-test.
+  `MapView` rebuilt into **six per-continent sections** (each its frame + hue-ramped mastery map +
+  its own mastered/accuracy/retention + Flags/Map bars) above one global activity heatmap.
+  Verified in preview + prod build (type-check + build clean, 0 console errors): onboarding
+  China→Asia-purple map, Egypt session card on the Africa frame (orange Check), zoom→2.56×
+  clamped + reset, exact-shape taps correct for Egypt **and microstate Monaco**, same-continent
+  distractors, MapView six color-coded sections with Egypt shaded orange; fresh log still gates
+  to onboarding. Roster ≈ Europe 44 / Asia 49 / Africa 54 / N.America 23 / S.America 12 /
+  Oceania 13.
 
 ---
 

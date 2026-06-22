@@ -17,9 +17,14 @@ const allFeatures = (
   }
 ).features
 
-const featureById = new Map<number, CountryFeature>(
-  allFeatures.map((f) => [Number(f.id), f]),
-)
+// Index by ISO numeric id. A few ids collide in the atlas (e.g. 36 = Australia and
+// the tiny Ashmore & Cartier Is.); first-wins keeps the sovereign landmass, which
+// the atlas lists first.
+const featureById = new Map<number, CountryFeature>()
+for (const f of allFeatures) {
+  const id = Number(f.id)
+  if (!featureById.has(id)) featureById.set(id, f)
+}
 
 /** An SVG `<path>` for one country, projected into a region frame. */
 export interface CountryShape {

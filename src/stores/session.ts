@@ -5,7 +5,7 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 
-import { EUROPE } from '@/data'
+import { WORLD } from '@/data'
 
 import { allEvents, appendEvent, clearLog, mergeEvents } from '@/engine/db'
 import { replayCard, replayLog } from '@/engine/replay'
@@ -27,8 +27,8 @@ import {
   type Skill,
 } from '@/engine/types'
 
-/** Europe is the only deck in v1 (DESIGN §9). */
-const DECK_COUNTRY_IDS = EUROPE.map((c) => c.id)
+/** The whole-world deck: every country across all six continents (DESIGN §9). */
+const DECK_COUNTRY_IDS = WORLD.map((c) => c.id)
 
 export const useSessionStore = defineStore('session', () => {
   /** Append-only log, in write order. The single source of truth. */

@@ -43,7 +43,7 @@ const canCheck = computed(() => selected.value !== null && !revealed.value)
 </script>
 
 <template>
-  <div class="card">
+  <div class="card" :style="`--region: var(--color-${country.continent})`">
     <main class="body">
       <h1 class="title">Which country?</h1>
 

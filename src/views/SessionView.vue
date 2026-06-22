@@ -7,7 +7,7 @@ import FlagCard from '@/components/FlagCard.vue'
 import LocationCard from '@/components/LocationCard.vue'
 import QuizChrome from '@/components/QuizChrome.vue'
 import ResultSheet from '@/components/ResultSheet.vue'
-import { EUROPE } from '@/data'
+import { COUNTRY_BY_ID, DECKS, WORLD } from '@/data'
 import type { Country } from '@/data'
 import { playCorrect, playFanfare, playWrong } from '@/lib/feedback'
 import { Rating } from '@/engine/types'
@@ -22,7 +22,7 @@ import type { ScheduledCard } from '@/stores/session'
 const router = useRouter()
 const session = useSessionStore()
 
-const COUNTRY_BY_ID = new Map<number, Country>(EUROPE.map((c) => [c.id, c]))
+const countryById = COUNTRY_BY_ID
 
 // Self-rate buttons shown after a correct answer, mapped to FSRS grades.
 const RATE_OPTIONS = [
@@ -45,7 +45,11 @@ const answered = ref(0)
 const planned = ref(0)
 
 const country = computed(() =>
-  current.value ? COUNTRY_BY_ID.get(current.value.ref.countryId) ?? null : null,
+  current.value ? countryById.get(current.value.ref.countryId) ?? null : null,
+)
+// The session screen adopts the current card's continent hue (DESIGN §11).
+const regionStyle = computed(() =>
+  country.value ? `--region: var(--color-${country.value.continent})` : '',
 )
 const finished = computed(() => ready.value && current.value === null)
 const progress = computed(() => {
@@ -63,9 +67,19 @@ function shuffle<T>(arr: T[]): T[] {
   return a
 }
 
-/** Four flag options: the answer plus three random distractors from the deck. */
+/**
+ * Four flag options: the answer plus three distractors. Distractors are drawn from
+ * the same continent (a fairer, more focused quiz); we top up from the whole world
+ * if a continent is too small to supply three.
+ */
 function buildOptions(answer: Country): Country[] {
-  const distractors = shuffle(EUROPE.filter((c) => c.id !== answer.id)).slice(0, 3)
+  const sameContinent = DECKS[answer.continent].filter((c) => c.id !== answer.id)
+  let distractors = shuffle(sameContinent).slice(0, 3)
+  if (distractors.length < 3) {
+    const taken = new Set([answer.id, ...distractors.map((c) => c.id)])
+    const extra = shuffle(WORLD.filter((c) => !taken.has(c.id))).slice(0, 3 - distractors.length)
+    distractors = [...distractors, ...extra]
+  }
   return shuffle([answer, ...distractors])
 }
 
@@ -113,7 +127,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="session">
+  <div class="session" :style="regionStyle">
     <QuizChrome :progress="progress" :streak="streak" @close="exit" />
 
     <!-- Active question -->

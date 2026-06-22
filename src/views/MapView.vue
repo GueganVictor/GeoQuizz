@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
 
-import { EUROPE, EUROPE_SHAPES, REGION_FRAMES } from '@/data'
+import { CONTINENTS, DECKS, REGION_FRAMES, shapesForContinent, type Continent } from '@/data'
 import {
   activityByDay,
   avgRetention,
@@ -13,33 +13,53 @@ import {
 } from '@/engine/progress'
 import { useSessionStore } from '@/stores/session'
 
-// The progress surface (Slice 7, DESIGN §8): a world/region mastery map shaded
-// along the continent hue, per-region accuracy + retention, and an Anki-style
-// activity heatmap — all driven by the real review log.
+// The progress surface (Slice 7, DESIGN §8) — now worldwide (Slice 9). One section
+// per continent: a mastery map shaded along that continent's hue, plus per-region
+// accuracy + retention. A single Anki-style activity heatmap spans all of them.
+// Everything is driven by the real, replayed review log.
 
 const session = useSessionStore()
 const ready = ref(false)
 
-const frame = REGION_FRAMES.europe!
-const shapes = EUROPE_SHAPES
-
-// --- Mastery map: per-country level 0..MASTERY_MAX, painted as a saturation ramp.
-const mastery = computed(() => countryMastery(session.states))
-
-/** Continent hue at a ramp opacity for the level; level 0 = unlearned grey. */
-function fillFor(countryId: number): string {
-  const level = mastery.value.get(countryId) ?? 0
-  if (level <= 0) return '#e7e9f0'
-  // 1..MASTERY_MAX → pale → full saturation of the Europe hue.
-  const opacity = 0.25 + (0.75 * level) / MASTERY_MAX
-  return `color-mix(in srgb, var(--region, var(--color-europe)) ${Math.round(opacity * 100)}%, #fff)`
+const CONTINENT_LABELS: Record<Continent, string> = {
+  europe: 'Europe',
+  asia: 'Asia',
+  africa: 'Africa',
+  namerica: 'North America',
+  samerica: 'South America',
+  oceania: 'Oceania',
 }
 
-const summary = computed(() => masterySummary(mastery.value, EUROPE.length))
+/** Per-continent mastery + stats, each scoped to that continent's deck + events. */
+const sections = computed(() =>
+  CONTINENTS.map((continent) => {
+    const deck = DECKS[continent]
+    const ids = new Set(deck.map((c) => c.id))
+    const events = session.events.filter((e) => ids.has(e.countryId))
+    const states = new Map(
+      [...session.states].filter(([, s]) => ids.has(s.ref.countryId)),
+    )
+    const mastery = countryMastery(states)
+    return {
+      continent,
+      label: CONTINENT_LABELS[continent],
+      frame: REGION_FRAMES[continent],
+      shapes: shapesForContinent(continent),
+      mastery,
+      summary: masterySummary(mastery, deck.length),
+      accuracy: regionAccuracy(events),
+      retention: avgRetention(states),
+    }
+  }),
+)
 
-// --- Per-region stats (Europe is the only v1 region).
-const accuracy = computed(() => regionAccuracy(session.events))
-const retention = computed(() => avgRetention(session.states))
+/** Continent hue at a ramp opacity for the level; level 0 = unlearned grey. */
+function fillFor(mastery: Map<number, number>, countryId: number): string {
+  const level = mastery.get(countryId) ?? 0
+  if (level <= 0) return '#e7e9f0'
+  const opacity = 0.25 + (0.75 * level) / MASTERY_MAX
+  return `color-mix(in srgb, var(--region) ${Math.round(opacity * 100)}%, #fff)`
+}
 
 function pct(x: number): string {
   return `${Math.round(x * 100)}%`
@@ -89,10 +109,11 @@ const weeks = computed<Cell[][]>(() => {
   return cols
 })
 
+// The heatmap uses the Europe hue as a neutral, global accent (it spans all regions).
 const heatStyle = (level: number) =>
   level <= 0
     ? '#eef0f5'
-    : `color-mix(in srgb, var(--region, var(--color-europe)) ${15 + level * 21}%, #fff)`
+    : `color-mix(in srgb, var(--color-europe) ${15 + level * 21}%, #fff)`
 
 onMounted(async () => {
   await session.init()
@@ -104,71 +125,70 @@ onMounted(async () => {
   <section class="page">
     <h1 class="title">Progress</h1>
 
-    <!-- Mastery map -->
-    <div class="block">
+    <!-- One section per continent (DESIGN §11 per-continent color system) -->
+    <div
+      v-for="sec in sections"
+      :key="sec.continent"
+      class="region"
+      :style="`--region: var(--color-${sec.continent})`"
+    >
+      <p class="block__kicker">{{ sec.label }}</p>
+
       <div class="mapcard">
-        <svg class="map" :viewBox="`0 0 ${frame.width} ${frame.height}`" role="img" aria-label="Mastery map">
+        <svg
+          class="map"
+          :viewBox="`0 0 ${sec.frame.width} ${sec.frame.height}`"
+          role="img"
+          :aria-label="`${sec.label} mastery map`"
+        >
           <path
-            v-for="s in shapes"
+            v-for="s in sec.shapes"
             :key="s.id"
             :d="s.d"
-            :style="{ fill: fillFor(s.id) }"
+            :style="{ fill: fillFor(sec.mastery, s.id) }"
             class="country"
           />
         </svg>
       </div>
-      <div class="legend">
-        <span class="legend__label">Unlearned</span>
-        <span class="legend__swatch" :style="{ background: '#e7e9f0' }" />
-        <span
-          v-for="l in MASTERY_MAX"
-          :key="l"
-          class="legend__swatch"
-          :style="{ background: `color-mix(in srgb, var(--region) ${Math.round((0.25 + (0.75 * l) / MASTERY_MAX) * 100)}%, #fff)` }"
-        />
-        <span class="legend__label">Mastered</span>
-      </div>
-    </div>
 
-    <!-- Region stats -->
-    <div class="block stats">
-      <p class="block__kicker">Europe</p>
-      <div class="stat-row">
-        <div class="stat">
-          <span class="stat__value">{{ summary.mastered }}<span class="stat__of">/{{ summary.total }}</span></span>
-          <span class="stat__label">mastered</span>
+      <div class="stats">
+        <div class="stat-row">
+          <div class="stat">
+            <span class="stat__value">{{ sec.summary.mastered }}<span class="stat__of">/{{ sec.summary.total }}</span></span>
+            <span class="stat__label">mastered</span>
+          </div>
+          <div class="stat">
+            <span class="stat__value">{{ pct(sec.accuracy.overall.rate) }}</span>
+            <span class="stat__label">accuracy</span>
+          </div>
+          <div class="stat">
+            <span class="stat__value">{{ pct(sec.retention) }}</span>
+            <span class="stat__label">retention</span>
+          </div>
         </div>
-        <div class="stat">
-          <span class="stat__value">{{ pct(accuracy.overall.rate) }}</span>
-          <span class="stat__label">accuracy</span>
-        </div>
-        <div class="stat">
-          <span class="stat__value">{{ pct(retention) }}</span>
-          <span class="stat__label">retention</span>
-        </div>
-      </div>
 
-      <div class="skills">
-        <div class="skill">
-          <span class="skill__name">🚩 Flags</span>
-          <span class="skill__bar">
-            <span class="skill__fill" :style="{ width: pct(accuracy.flag.rate) }" />
-          </span>
-          <span class="skill__pct">{{ pct(accuracy.flag.rate) }}</span>
-        </div>
-        <div class="skill">
-          <span class="skill__name">📍 Map</span>
-          <span class="skill__bar">
-            <span class="skill__fill" :style="{ width: pct(accuracy.location.rate) }" />
-          </span>
-          <span class="skill__pct">{{ pct(accuracy.location.rate) }}</span>
+        <div class="skills">
+          <div class="skill">
+            <span class="skill__name">🚩 Flags</span>
+            <span class="skill__bar">
+              <span class="skill__fill" :style="{ width: pct(sec.accuracy.flag.rate) }" />
+            </span>
+            <span class="skill__pct">{{ pct(sec.accuracy.flag.rate) }}</span>
+          </div>
+          <div class="skill">
+            <span class="skill__name">📍 Map</span>
+            <span class="skill__bar">
+              <span class="skill__fill" :style="{ width: pct(sec.accuracy.location.rate) }" />
+            </span>
+            <span class="skill__pct">{{ pct(sec.accuracy.location.rate) }}</span>
+          </div>
         </div>
       </div>
     </div>
 
-    <!-- Activity heatmap -->
+    <!-- Activity heatmap (global, spans all continents) -->
     <div class="block">
-      <p class="block__kicker">Activity</p>
+      <p class="block__kicker block__kicker--neutral">Activity</p>
       <div class="heat">
         <div v-for="(col, ci) in weeks" :key="ci" class="heat__col">
           <span
@@ -195,7 +215,7 @@ onMounted(async () => {
   padding: 24px 22px 32px;
   display: flex;
   flex-direction: column;
-  gap: 22px;
+  gap: 26px;
 }
 .title {
   font-family: var(--font-display);
@@ -205,6 +225,7 @@ onMounted(async () => {
   color: #2b2b3a;
 }
 
+.region,
 .block {
   display: flex;
   flex-direction: column;
@@ -218,6 +239,9 @@ onMounted(async () => {
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--region, var(--color-europe));
+}
+.block__kicker--neutral {
+  color: #8a8a9a;
 }
 
 /* Mastery map */

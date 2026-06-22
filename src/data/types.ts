@@ -1,13 +1,16 @@
 // Domain types for the country catalog (Slice 1).
 
 /** The six continent buckets that own the per-continent color system (DESIGN §11). */
-export type Continent =
-  | 'europe'
-  | 'asia'
-  | 'africa'
-  | 'namerica'
-  | 'samerica'
-  | 'oceania'
+export const CONTINENTS = [
+  'europe',
+  'asia',
+  'africa',
+  'namerica',
+  'samerica',
+  'oceania',
+] as const
+
+export type Continent = (typeof CONTINENTS)[number]
 
 /**
  * One catalog entry. A *card* is a (country × skill) pair (DESIGN §2); this is

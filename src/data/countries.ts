@@ -1,14 +1,24 @@
 import type { Country } from './types'
 
 /**
- * The Europe deck — the v1 validation region (DESIGN §9). One entry per country
- * whose geometry is present in the world-atlas `countries-50m` set, keyed by ISO
- * numeric id. Ordered population-descending for readability; consumers sort as
- * they need (the onboarding triage is the only population-sorted view, DESIGN §3).
+ * The worldwide country catalog (Slice 9). One entry per sovereign state whose
+ * geometry is present in the world-atlas `countries-50m` set, keyed by ISO numeric
+ * id (the key shared with the TopoJSON) and lowercase ISO2 (flagcdn).
  *
- * Populations are Natural Earth `pop_est`-scale estimates — precise enough to rank
- * the triage, not authoritative demographics.
+ * Decks are split per continent — each continent owns a signature hue (DESIGN §11)
+ * and its own region map frame (regions.ts). Microstates are included: the location
+ * map is pinch-zoomable, so even a single-pixel country is tappable (DESIGN §5).
+ *
+ * Within each array, order is population-descending for readability; the only
+ * population-sorted *view* is the onboarding triage (top 100 by population,
+ * DESIGN §3). Populations are Natural Earth `pop_est`-scale estimates — precise
+ * enough to rank the triage, not authoritative demographics.
+ *
+ * Transcontinental countries are bucketed for map-framing sanity: Russia, Turkey,
+ * the Caucasus, Kazakhstan and Cyprus's neighbours sit in Asia (so the Europe frame
+ * stays tight on the western landmass); Cyprus stays in Europe (EU); Egypt in Africa.
  */
+
 export const EUROPE: Country[] = [
   { id: 276, iso2: 'de', name: 'Germany', continent: 'europe', population: 83_200_000 },
   { id: 250, iso2: 'fr', name: 'France', continent: 'europe', population: 67_800_000 },
@@ -20,10 +30,10 @@ export const EUROPE: Country[] = [
   { id: 642, iso2: 'ro', name: 'Romania', continent: 'europe', population: 19_200_000 },
   { id: 528, iso2: 'nl', name: 'Netherlands', continent: 'europe', population: 17_500_000 },
   { id: 56, iso2: 'be', name: 'Belgium', continent: 'europe', population: 11_600_000 },
-  { id: 203, iso2: 'cz', name: 'Czechia', continent: 'europe', population: 10_700_000 },
   { id: 300, iso2: 'gr', name: 'Greece', continent: 'europe', population: 10_400_000 },
-  { id: 752, iso2: 'se', name: 'Sweden', continent: 'europe', population: 10_400_000 },
+  { id: 203, iso2: 'cz', name: 'Czechia', continent: 'europe', population: 10_700_000 },
   { id: 620, iso2: 'pt', name: 'Portugal', continent: 'europe', population: 10_300_000 },
+  { id: 752, iso2: 'se', name: 'Sweden', continent: 'europe', population: 10_400_000 },
   { id: 348, iso2: 'hu', name: 'Hungary', continent: 'europe', population: 9_700_000 },
   { id: 112, iso2: 'by', name: 'Belarus', continent: 'europe', population: 9_400_000 },
   { id: 40, iso2: 'at', name: 'Austria', continent: 'europe', population: 9_000_000 },
@@ -44,9 +54,202 @@ export const EUROPE: Country[] = [
   { id: 705, iso2: 'si', name: 'Slovenia', continent: 'europe', population: 2_100_000 },
   { id: 428, iso2: 'lv', name: 'Latvia', continent: 'europe', population: 1_900_000 },
   { id: 233, iso2: 'ee', name: 'Estonia', continent: 'europe', population: 1_300_000 },
+  { id: 196, iso2: 'cy', name: 'Cyprus', continent: 'europe', population: 1_200_000 },
   { id: 442, iso2: 'lu', name: 'Luxembourg', continent: 'europe', population: 630_000 },
   { id: 499, iso2: 'me', name: 'Montenegro', continent: 'europe', population: 620_000 },
+  { id: 470, iso2: 'mt', name: 'Malta', continent: 'europe', population: 520_000 },
   { id: 352, iso2: 'is', name: 'Iceland', continent: 'europe', population: 360_000 },
+  { id: 20, iso2: 'ad', name: 'Andorra', continent: 'europe', population: 79_000 },
+  { id: 438, iso2: 'li', name: 'Liechtenstein', continent: 'europe', population: 39_000 },
+  { id: 492, iso2: 'mc', name: 'Monaco', continent: 'europe', population: 39_000 },
+  { id: 674, iso2: 'sm', name: 'San Marino', continent: 'europe', population: 34_000 },
+  { id: 336, iso2: 'va', name: 'Vatican City', continent: 'europe', population: 800 },
+]
+
+export const ASIA: Country[] = [
+  { id: 156, iso2: 'cn', name: 'China', continent: 'asia', population: 1_412_000_000 },
+  { id: 356, iso2: 'in', name: 'India', continent: 'asia', population: 1_393_000_000 },
+  { id: 360, iso2: 'id', name: 'Indonesia', continent: 'asia', population: 273_500_000 },
+  { id: 586, iso2: 'pk', name: 'Pakistan', continent: 'asia', population: 225_200_000 },
+  { id: 50, iso2: 'bd', name: 'Bangladesh', continent: 'asia', population: 166_300_000 },
+  { id: 643, iso2: 'ru', name: 'Russia', continent: 'asia', population: 144_100_000 },
+  { id: 392, iso2: 'jp', name: 'Japan', continent: 'asia', population: 125_800_000 },
+  { id: 608, iso2: 'ph', name: 'Philippines', continent: 'asia', population: 111_000_000 },
+  { id: 704, iso2: 'vn', name: 'Vietnam', continent: 'asia', population: 98_200_000 },
+  { id: 792, iso2: 'tr', name: 'Turkey', continent: 'asia', population: 84_300_000 },
+  { id: 364, iso2: 'ir', name: 'Iran', continent: 'asia', population: 85_000_000 },
+  { id: 764, iso2: 'th', name: 'Thailand', continent: 'asia', population: 69_800_000 },
+  { id: 104, iso2: 'mm', name: 'Myanmar', continent: 'asia', population: 54_800_000 },
+  { id: 410, iso2: 'kr', name: 'South Korea', continent: 'asia', population: 51_700_000 },
+  { id: 368, iso2: 'iq', name: 'Iraq', continent: 'asia', population: 41_200_000 },
+  { id: 4, iso2: 'af', name: 'Afghanistan', continent: 'asia', population: 39_800_000 },
+  { id: 682, iso2: 'sa', name: 'Saudi Arabia', continent: 'asia', population: 35_300_000 },
+  { id: 860, iso2: 'uz', name: 'Uzbekistan', continent: 'asia', population: 34_200_000 },
+  { id: 458, iso2: 'my', name: 'Malaysia', continent: 'asia', population: 32_700_000 },
+  { id: 524, iso2: 'np', name: 'Nepal', continent: 'asia', population: 29_700_000 },
+  { id: 887, iso2: 'ye', name: 'Yemen', continent: 'asia', population: 30_500_000 },
+  { id: 408, iso2: 'kp', name: 'North Korea', continent: 'asia', population: 25_900_000 },
+  { id: 158, iso2: 'tw', name: 'Taiwan', continent: 'asia', population: 23_600_000 },
+  { id: 144, iso2: 'lk', name: 'Sri Lanka', continent: 'asia', population: 22_200_000 },
+  { id: 398, iso2: 'kz', name: 'Kazakhstan', continent: 'asia', population: 19_000_000 },
+  { id: 760, iso2: 'sy', name: 'Syria', continent: 'asia', population: 18_300_000 },
+  { id: 116, iso2: 'kh', name: 'Cambodia', continent: 'asia', population: 16_700_000 },
+  { id: 400, iso2: 'jo', name: 'Jordan', continent: 'asia', population: 10_200_000 },
+  { id: 31, iso2: 'az', name: 'Azerbaijan', continent: 'asia', population: 10_100_000 },
+  { id: 784, iso2: 'ae', name: 'United Arab Emirates', continent: 'asia', population: 9_900_000 },
+  { id: 762, iso2: 'tj', name: 'Tajikistan', continent: 'asia', population: 9_700_000 },
+  { id: 418, iso2: 'la', name: 'Laos', continent: 'asia', population: 7_400_000 },
+  { id: 422, iso2: 'lb', name: 'Lebanon', continent: 'asia', population: 6_800_000 },
+  { id: 417, iso2: 'kg', name: 'Kyrgyzstan', continent: 'asia', population: 6_600_000 },
+  { id: 795, iso2: 'tm', name: 'Turkmenistan', continent: 'asia', population: 6_100_000 },
+  { id: 702, iso2: 'sg', name: 'Singapore', continent: 'asia', population: 5_700_000 },
+  { id: 275, iso2: 'ps', name: 'Palestine', continent: 'asia', population: 5_200_000 },
+  { id: 376, iso2: 'il', name: 'Israel', continent: 'asia', population: 9_400_000 },
+  { id: 414, iso2: 'kw', name: 'Kuwait', continent: 'asia', population: 4_300_000 },
+  { id: 268, iso2: 'ge', name: 'Georgia', continent: 'asia', population: 3_700_000 },
+  { id: 512, iso2: 'om', name: 'Oman', continent: 'asia', population: 5_100_000 },
+  { id: 51, iso2: 'am', name: 'Armenia', continent: 'asia', population: 3_000_000 },
+  { id: 496, iso2: 'mn', name: 'Mongolia', continent: 'asia', population: 3_300_000 },
+  { id: 634, iso2: 'qa', name: 'Qatar', continent: 'asia', population: 2_900_000 },
+  { id: 48, iso2: 'bh', name: 'Bahrain', continent: 'asia', population: 1_700_000 },
+  { id: 626, iso2: 'tl', name: 'Timor-Leste', continent: 'asia', population: 1_300_000 },
+  { id: 64, iso2: 'bt', name: 'Bhutan', continent: 'asia', population: 780_000 },
+  { id: 96, iso2: 'bn', name: 'Brunei', continent: 'asia', population: 440_000 },
+  { id: 462, iso2: 'mv', name: 'Maldives', continent: 'asia', population: 540_000 },
+]
+
+export const AFRICA: Country[] = [
+  { id: 566, iso2: 'ng', name: 'Nigeria', continent: 'africa', population: 211_400_000 },
+  { id: 231, iso2: 'et', name: 'Ethiopia', continent: 'africa', population: 117_900_000 },
+  { id: 818, iso2: 'eg', name: 'Egypt', continent: 'africa', population: 104_300_000 },
+  { id: 180, iso2: 'cd', name: 'DR Congo', continent: 'africa', population: 95_900_000 },
+  { id: 834, iso2: 'tz', name: 'Tanzania', continent: 'africa', population: 61_500_000 },
+  { id: 710, iso2: 'za', name: 'South Africa', continent: 'africa', population: 60_000_000 },
+  { id: 404, iso2: 'ke', name: 'Kenya', continent: 'africa', population: 54_900_000 },
+  { id: 800, iso2: 'ug', name: 'Uganda', continent: 'africa', population: 47_100_000 },
+  { id: 12, iso2: 'dz', name: 'Algeria', continent: 'africa', population: 44_600_000 },
+  { id: 729, iso2: 'sd', name: 'Sudan', continent: 'africa', population: 44_900_000 },
+  { id: 504, iso2: 'ma', name: 'Morocco', continent: 'africa', population: 37_300_000 },
+  { id: 24, iso2: 'ao', name: 'Angola', continent: 'africa', population: 33_900_000 },
+  { id: 508, iso2: 'mz', name: 'Mozambique', continent: 'africa', population: 32_200_000 },
+  { id: 288, iso2: 'gh', name: 'Ghana', continent: 'africa', population: 31_700_000 },
+  { id: 466, iso2: 'ml', name: 'Mali', continent: 'africa', population: 20_900_000 },
+  { id: 450, iso2: 'mg', name: 'Madagascar', continent: 'africa', population: 28_400_000 },
+  { id: 384, iso2: 'ci', name: "Côte d'Ivoire", continent: 'africa', population: 27_100_000 },
+  { id: 120, iso2: 'cm', name: 'Cameroon', continent: 'africa', population: 27_200_000 },
+  { id: 562, iso2: 'ne', name: 'Niger', continent: 'africa', population: 25_100_000 },
+  { id: 854, iso2: 'bf', name: 'Burkina Faso', continent: 'africa', population: 21_500_000 },
+  { id: 454, iso2: 'mw', name: 'Malawi', continent: 'africa', population: 19_600_000 },
+  { id: 894, iso2: 'zm', name: 'Zambia', continent: 'africa', population: 18_900_000 },
+  { id: 148, iso2: 'td', name: 'Chad', continent: 'africa', population: 16_900_000 },
+  { id: 706, iso2: 'so', name: 'Somalia', continent: 'africa', population: 16_400_000 },
+  { id: 686, iso2: 'sn', name: 'Senegal', continent: 'africa', population: 16_900_000 },
+  { id: 716, iso2: 'zw', name: 'Zimbabwe', continent: 'africa', population: 15_100_000 },
+  { id: 646, iso2: 'rw', name: 'Rwanda', continent: 'africa', population: 13_300_000 },
+  { id: 324, iso2: 'gn', name: 'Guinea', continent: 'africa', population: 13_500_000 },
+  { id: 204, iso2: 'bj', name: 'Benin', continent: 'africa', population: 12_500_000 },
+  { id: 108, iso2: 'bi', name: 'Burundi', continent: 'africa', population: 12_300_000 },
+  { id: 728, iso2: 'ss', name: 'South Sudan', continent: 'africa', population: 11_400_000 },
+  { id: 788, iso2: 'tn', name: 'Tunisia', continent: 'africa', population: 11_900_000 },
+  { id: 768, iso2: 'tg', name: 'Togo', continent: 'africa', population: 8_500_000 },
+  { id: 430, iso2: 'lr', name: 'Liberia', continent: 'africa', population: 5_200_000 },
+  { id: 434, iso2: 'ly', name: 'Libya', continent: 'africa', population: 6_900_000 },
+  { id: 178, iso2: 'cg', name: 'Congo', continent: 'africa', population: 5_700_000 },
+  { id: 140, iso2: 'cf', name: 'Central African Republic', continent: 'africa', population: 4_900_000 },
+  { id: 694, iso2: 'sl', name: 'Sierra Leone', continent: 'africa', population: 8_100_000 },
+  { id: 478, iso2: 'mr', name: 'Mauritania', continent: 'africa', population: 4_600_000 },
+  { id: 226, iso2: 'gq', name: 'Equatorial Guinea', continent: 'africa', population: 1_400_000 },
+  { id: 266, iso2: 'ga', name: 'Gabon', continent: 'africa', population: 2_300_000 },
+  { id: 72, iso2: 'bw', name: 'Botswana', continent: 'africa', population: 2_400_000 },
+  { id: 270, iso2: 'gm', name: 'Gambia', continent: 'africa', population: 2_500_000 },
+  { id: 624, iso2: 'gw', name: 'Guinea-Bissau', continent: 'africa', population: 2_000_000 },
+  { id: 516, iso2: 'na', name: 'Namibia', continent: 'africa', population: 2_500_000 },
+  { id: 748, iso2: 'sz', name: 'Eswatini', continent: 'africa', population: 1_200_000 },
+  { id: 426, iso2: 'ls', name: 'Lesotho', continent: 'africa', population: 2_100_000 },
+  { id: 232, iso2: 'er', name: 'Eritrea', continent: 'africa', population: 3_600_000 },
+  { id: 262, iso2: 'dj', name: 'Djibouti', continent: 'africa', population: 1_000_000 },
+  { id: 132, iso2: 'cv', name: 'Cape Verde', continent: 'africa', population: 560_000 },
+  { id: 174, iso2: 'km', name: 'Comoros', continent: 'africa', population: 870_000 },
+  { id: 480, iso2: 'mu', name: 'Mauritius', continent: 'africa', population: 1_300_000 },
+  { id: 678, iso2: 'st', name: 'São Tomé and Príncipe', continent: 'africa', population: 220_000 },
+  { id: 690, iso2: 'sc', name: 'Seychelles', continent: 'africa', population: 99_000 },
+]
+
+export const NAMERICA: Country[] = [
+  { id: 840, iso2: 'us', name: 'United States', continent: 'namerica', population: 331_900_000 },
+  { id: 484, iso2: 'mx', name: 'Mexico', continent: 'namerica', population: 126_700_000 },
+  { id: 124, iso2: 'ca', name: 'Canada', continent: 'namerica', population: 38_200_000 },
+  { id: 320, iso2: 'gt', name: 'Guatemala', continent: 'namerica', population: 17_100_000 },
+  { id: 192, iso2: 'cu', name: 'Cuba', continent: 'namerica', population: 11_300_000 },
+  { id: 332, iso2: 'ht', name: 'Haiti', continent: 'namerica', population: 11_400_000 },
+  { id: 214, iso2: 'do', name: 'Dominican Republic', continent: 'namerica', population: 10_900_000 },
+  { id: 340, iso2: 'hn', name: 'Honduras', continent: 'namerica', population: 10_100_000 },
+  { id: 558, iso2: 'ni', name: 'Nicaragua', continent: 'namerica', population: 6_900_000 },
+  { id: 222, iso2: 'sv', name: 'El Salvador', continent: 'namerica', population: 6_500_000 },
+  { id: 188, iso2: 'cr', name: 'Costa Rica', continent: 'namerica', population: 5_100_000 },
+  { id: 591, iso2: 'pa', name: 'Panama', continent: 'namerica', population: 4_400_000 },
+  { id: 388, iso2: 'jm', name: 'Jamaica', continent: 'namerica', population: 2_800_000 },
+  { id: 780, iso2: 'tt', name: 'Trinidad and Tobago', continent: 'namerica', population: 1_400_000 },
+  { id: 84, iso2: 'bz', name: 'Belize', continent: 'namerica', population: 400_000 },
+  { id: 44, iso2: 'bs', name: 'Bahamas', continent: 'namerica', population: 410_000 },
+  { id: 52, iso2: 'bb', name: 'Barbados', continent: 'namerica', population: 290_000 },
+  { id: 662, iso2: 'lc', name: 'Saint Lucia', continent: 'namerica', population: 180_000 },
+  { id: 308, iso2: 'gd', name: 'Grenada', continent: 'namerica', population: 110_000 },
+  { id: 670, iso2: 'vc', name: 'St Vincent & Grenadines', continent: 'namerica', population: 110_000 },
+  { id: 28, iso2: 'ag', name: 'Antigua and Barbuda', continent: 'namerica', population: 98_000 },
+  { id: 212, iso2: 'dm', name: 'Dominica', continent: 'namerica', population: 72_000 },
+  { id: 659, iso2: 'kn', name: 'St Kitts and Nevis', continent: 'namerica', population: 53_000 },
+]
+
+export const SAMERICA: Country[] = [
+  { id: 76, iso2: 'br', name: 'Brazil', continent: 'samerica', population: 214_300_000 },
+  { id: 170, iso2: 'co', name: 'Colombia', continent: 'samerica', population: 51_500_000 },
+  { id: 32, iso2: 'ar', name: 'Argentina', continent: 'samerica', population: 45_800_000 },
+  { id: 604, iso2: 'pe', name: 'Peru', continent: 'samerica', population: 33_700_000 },
+  { id: 862, iso2: 've', name: 'Venezuela', continent: 'samerica', population: 28_700_000 },
+  { id: 152, iso2: 'cl', name: 'Chile', continent: 'samerica', population: 19_500_000 },
+  { id: 218, iso2: 'ec', name: 'Ecuador', continent: 'samerica', population: 17_800_000 },
+  { id: 68, iso2: 'bo', name: 'Bolivia', continent: 'samerica', population: 11_800_000 },
+  { id: 600, iso2: 'py', name: 'Paraguay', continent: 'samerica', population: 6_700_000 },
+  { id: 858, iso2: 'uy', name: 'Uruguay', continent: 'samerica', population: 3_500_000 },
+  { id: 328, iso2: 'gy', name: 'Guyana', continent: 'samerica', population: 790_000 },
+  { id: 740, iso2: 'sr', name: 'Suriname', continent: 'samerica', population: 590_000 },
+]
+
+export const OCEANIA: Country[] = [
+  { id: 36, iso2: 'au', name: 'Australia', continent: 'oceania', population: 25_700_000 },
+  { id: 598, iso2: 'pg', name: 'Papua New Guinea', continent: 'oceania', population: 9_100_000 },
+  { id: 554, iso2: 'nz', name: 'New Zealand', continent: 'oceania', population: 5_100_000 },
+  { id: 242, iso2: 'fj', name: 'Fiji', continent: 'oceania', population: 900_000 },
+  { id: 90, iso2: 'sb', name: 'Solomon Islands', continent: 'oceania', population: 700_000 },
+  { id: 548, iso2: 'vu', name: 'Vanuatu', continent: 'oceania', population: 310_000 },
+  { id: 882, iso2: 'ws', name: 'Samoa', continent: 'oceania', population: 200_000 },
+  { id: 296, iso2: 'ki', name: 'Kiribati', continent: 'oceania', population: 120_000 },
+  { id: 583, iso2: 'fm', name: 'Micronesia', continent: 'oceania', population: 110_000 },
+  { id: 776, iso2: 'to', name: 'Tonga', continent: 'oceania', population: 110_000 },
+  { id: 584, iso2: 'mh', name: 'Marshall Islands', continent: 'oceania', population: 42_000 },
+  { id: 585, iso2: 'pw', name: 'Palau', continent: 'oceania', population: 18_000 },
+  { id: 520, iso2: 'nr', name: 'Nauru', continent: 'oceania', population: 11_000 },
+]
+
+/** Decks by continent (DESIGN §11 per-continent color system). */
+export const DECKS_BY_CONTINENT = {
+  europe: EUROPE,
+  asia: ASIA,
+  africa: AFRICA,
+  namerica: NAMERICA,
+  samerica: SAMERICA,
+  oceania: OCEANIA,
+} as const
+
+/** The whole-world deck — every country across all six continents (DESIGN §9). */
+export const WORLD: Country[] = [
+  ...EUROPE,
+  ...ASIA,
+  ...AFRICA,
+  ...NAMERICA,
+  ...SAMERICA,
+  ...OCEANIA,
 ]
 
 /** flagcdn flag image URL by ISO2 code (DESIGN §6). Widths: w160 / w320 / w640 … */

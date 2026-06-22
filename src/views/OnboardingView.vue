@@ -3,7 +3,7 @@ import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 
 import AppButton from '@/components/AppButton.vue'
-import { EUROPE, EUROPE_SHAPES, REGION_FRAMES, flagUrl } from '@/data'
+import { REGION_FRAMES, WORLD, flagUrl, shapesForContinent } from '@/data'
 import type { Country } from '@/data'
 import { TRIAGE_CHOICES, triageRating, type TriageVerdict } from '@/engine/triage'
 import { useSessionStore } from '@/stores/session'
@@ -17,8 +17,8 @@ import { useSessionStore } from '@/stores/session'
 const router = useRouter()
 const session = useSessionStore()
 
-const frame = REGION_FRAMES.europe!
-const shapes = EUROPE_SHAPES
+/** Calibration triage covers the top 100 countries by population (DESIGN §3). */
+const TRIAGE_TOP = 100
 
 // Phases of the flow: a mascot intro, the per-country taps, then a celebration.
 type Phase = 'intro' | 'triage' | 'done'
@@ -33,6 +33,12 @@ const busy = ref(false)
 
 const total = ref(0)
 const current = computed<Country | null>(() => queue.value[index.value] ?? null)
+// Each card adopts its country's continent frame, shapes and hue (DESIGN §11).
+const frame = computed(() => (current.value ? REGION_FRAMES[current.value.continent] : null))
+const shapes = computed(() => (current.value ? shapesForContinent(current.value.continent) : []))
+const regionStyle = computed(() =>
+  current.value ? `--region: var(--color-${current.value.continent})` : '',
+)
 const progress = computed(() =>
   total.value === 0 ? 0 : Math.min(100, (index.value / total.value) * 100),
 )
@@ -58,22 +64,25 @@ function finish() {
 
 onMounted(async () => {
   await session.init()
-  // Resume-safe: triage only countries that have no events yet.
+  // The top 100 countries by population (largest first, DESIGN §3) …
+  const top = [...WORLD].sort((a, b) => b.population - a.population).slice(0, TRIAGE_TOP)
+  // … resume-safe: triage only those with no events yet.
   const introduced = session.introducedCountryIds
-  queue.value = EUROPE.filter((c) => !introduced.has(c.id))
+  queue.value = top.filter((c) => !introduced.has(c.id))
   total.value = queue.value.length
   if (total.value === 0) phase.value = 'done'
 })
 </script>
 
 <template>
-  <div class="onboard">
+  <div class="onboard" :style="regionStyle">
     <!-- Intro: mascot sets up the one-time calibration (DESIGN §11 onboarding) -->
     <main v-if="phase === 'intro'" class="intro">
       <div class="globe">🌍</div>
       <h1 class="intro__title">Let's tune your deck</h1>
       <p class="intro__sub">
-        Quick pass through Europe — tell us what you already know so we focus on the rest.
+        Quick pass through the best-known countries — tell us what you already know so we
+        focus on the rest.
       </p>
       <AppButton block @click="begin">Let's go</AppButton>
     </main>
@@ -93,7 +102,7 @@ onMounted(async () => {
         </div>
 
         <div class="mapcard">
-          <svg class="map" :viewBox="`0 0 ${frame.width} ${frame.height}`" role="img">
+          <svg class="map" :viewBox="`0 0 ${frame?.width ?? 0} ${frame?.height ?? 0}`" role="img">
             <path
               v-for="s in shapes"
               :key="s.id"
