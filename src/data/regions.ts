@@ -74,3 +74,17 @@ export const REGION_FRAMES: Record<Continent, RegionFrame> = {
     ],
   },
 }
+
+/**
+ * A single whole-world frame, used when the "region zoom" setting is off: the player
+ * is shown the entire world (Antarctica clipped) and zooms/pans in by hand. Small
+ * countries are hard to hit at this scale by design — that is the harder global mode.
+ */
+export const WORLD_FRAME: RegionFrame = {
+  width: 680,
+  height: 460,
+  bounds: [
+    [-180, -56],
+    [180, 80],
+  ],
+}

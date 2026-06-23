@@ -2,8 +2,17 @@
 import { computed, ref } from 'vue'
 
 import AppButton from '@/components/AppButton.vue'
-import { contextForContinent, REGION_FRAMES, shapesForContinent } from '@/data'
+import {
+  contextForContinent,
+  REGION_FRAMES,
+  shapesForContinent,
+  WORLD_FRAME,
+  worldContext,
+  worldShapes,
+} from '@/data'
 import type { Country } from '@/data'
+import { randomTints } from '@/lib/tint'
+import { useSettingsStore } from '@/stores/settings'
 
 // One "tap the country" question over the region map (DESIGN §5). Grading is an
 // exact-shape hit-test by ISO numeric id. Self-contained like FlagCard: owns the
@@ -19,11 +28,33 @@ const props = defineProps<{
 
 const emit = defineEmits<{ answered: [correct: boolean] }>()
 
-// The continent's deck is the tappable field; projection precomputed in the catalog.
-const frame = computed(() => REGION_FRAMES[props.country.continent])
-const shapes = computed(() => shapesForContinent(props.country.continent))
-// The rest of the world around the region, drawn greyed + non-interactive for context.
-const context = computed(() => contextForContinent(props.country.continent))
+// Region zoom (DESIGN §5, settings-toggleable): on → the map is framed to the target's
+// continent; off → the whole world is shown and the player zooms/pans in by hand.
+const settings = useSettingsStore()
+const regionZoom = computed(() => settings.regionZoom)
+
+// The tappable field + its projection. Precomputed in the catalog (region or world).
+const frame = computed(() =>
+  regionZoom.value ? REGION_FRAMES[props.country.continent] : WORLD_FRAME,
+)
+const shapes = computed(() =>
+  regionZoom.value ? shapesForContinent(props.country.continent) : worldShapes(),
+)
+// The surrounding world (territories etc.), drawn non-interactive behind the deck.
+const context = computed(() =>
+  regionZoom.value ? contextForContinent(props.country.continent) : worldContext(),
+)
+// Subtle random per-country tint so neighbours read apart — applied to the deck *and*
+// the surrounding context (re-rolled per card, carries no meaning).
+const tints = computed(() =>
+  randomTints([...shapes.value, ...context.value].map((s) => s.id)),
+)
+
+/** Inline style for a deck path: its random tint, plus tap-lock once revealed. */
+function pathStyle(id: number) {
+  const bg = `--bg:${tints.value.get(id)}`
+  return revealed.value ? `${bg};pointer-events:none` : bg
+}
 
 const tapped = ref<number | null>(null)
 const revealed = ref(false)
@@ -179,7 +210,13 @@ function resetZoom() {
         >
           <g :transform="transform">
             <!-- Surrounding world (context only — not part of the answer set) -->
-            <path v-for="s in context" :key="`ctx-${s.id}`" :d="s.d" class="context" />
+            <path
+              v-for="s in context"
+              :key="`ctx-${s.id}`"
+              :d="s.d"
+              class="context"
+              :style="{ '--bg': tints.get(s.id) }"
+            />
             <!-- The region's countries: the tappable answer field -->
             <path
               v-for="s in shapes"
@@ -187,7 +224,7 @@ function resetZoom() {
               :d="s.d"
               :data-id="s.id"
               :class="countryClass(s.id)"
-              :style="revealed ? 'pointer-events:none' : ''"
+              :style="pathStyle(s.id)"
               @click="tap(s.id)"
             />
           </g>
@@ -242,18 +279,21 @@ function resetZoom() {
   display: block;
   touch-action: none;
 }
-/* Surrounding world: recedes behind the playable region (paler, faint outline). */
+/* Surrounding world: tinted like the deck (same random palette) but non-interactive,
+   with a lighter outline so the playable region still reads as the foreground. */
 .context {
-  fill: #f1f2f6;
-  stroke: #c8ccd6;
-  stroke-width: 1;
+  fill: var(--bg, #eef0f5);
+  stroke: #b9bdc9;
+  stroke-width: 0.6;
   vector-effect: non-scaling-stroke;
   pointer-events: none;
 }
 .country {
-  fill: #dbdee8;
+  /* Subtle random per-country tint (var set inline) so neighbours read apart; the
+     thin outline can then stay slim without tiny islands collapsing to pure border. */
+  fill: var(--bg, #dbdee8);
   stroke: #222a33;
-  stroke-width: 1;
+  stroke-width: 0.6;
   vector-effect: non-scaling-stroke;
   cursor: pointer;
   transition: fill 0.12s ease;

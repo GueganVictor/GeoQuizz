@@ -3,10 +3,21 @@ import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 
 import AppButton from '@/components/AppButton.vue'
-import { contextForContinent, REGION_FRAMES, WORLD, flagUrl, shapesForContinent } from '@/data'
+import {
+  contextForContinent,
+  REGION_FRAMES,
+  WORLD,
+  WORLD_FRAME,
+  flagUrl,
+  shapesForContinent,
+  worldContext,
+  worldShapes,
+} from '@/data'
 import type { Country } from '@/data'
+import { randomTints } from '@/lib/tint'
 import { TRIAGE_CHOICES, triageRating, type TriageVerdict } from '@/engine/triage'
 import { useSessionStore } from '@/stores/session'
+import { useSettingsStore } from '@/stores/settings'
 
 // First-run calibration triage (Slice 5, DESIGN §3). A single combined pass over
 // the deck: for each country we show flag + name + location and ask "Know it /
@@ -16,6 +27,7 @@ import { useSessionStore } from '@/stores/session'
 
 const router = useRouter()
 const session = useSessionStore()
+const settings = useSettingsStore()
 
 /** Calibration triage covers the top 100 countries by population (DESIGN §3). */
 const TRIAGE_TOP = 100
@@ -33,10 +45,20 @@ const busy = ref(false)
 
 const total = ref(0)
 const current = computed<Country | null>(() => queue.value[index.value] ?? null)
-// Each card adopts its country's continent frame, shapes and hue (DESIGN §11).
-const frame = computed(() => (current.value ? REGION_FRAMES[current.value.continent] : null))
-const shapes = computed(() => (current.value ? shapesForContinent(current.value.continent) : []))
-const context = computed(() => (current.value ? contextForContinent(current.value.continent) : []))
+// Each card adopts its country's continent frame, shapes and hue (DESIGN §11) —
+// unless region zoom is off, in which case the whole world is shown (settings).
+const regionZoom = computed(() => settings.regionZoom)
+const frame = computed(() =>
+  current.value ? (regionZoom.value ? REGION_FRAMES[current.value.continent] : WORLD_FRAME) : null,
+)
+const shapes = computed(() =>
+  current.value ? (regionZoom.value ? shapesForContinent(current.value.continent) : worldShapes()) : [],
+)
+const context = computed(() =>
+  current.value ? (regionZoom.value ? contextForContinent(current.value.continent) : worldContext()) : [],
+)
+// Subtle random per-country tint so neighbours read apart — deck + surrounding context.
+const tints = computed(() => randomTints([...shapes.value, ...context.value].map((s) => s.id)))
 const regionStyle = computed(() =>
   current.value ? `--region: var(--color-${current.value.continent})` : '',
 )
@@ -104,12 +126,19 @@ onMounted(async () => {
 
         <div class="mapcard">
           <svg class="map" :viewBox="`0 0 ${frame?.width ?? 0} ${frame?.height ?? 0}`" role="img">
-            <path v-for="s in context" :key="`ctx-${s.id}`" :d="s.d" class="context" />
+            <path
+              v-for="s in context"
+              :key="`ctx-${s.id}`"
+              :d="s.d"
+              class="context"
+              :style="{ '--bg': tints.get(s.id) }"
+            />
             <path
               v-for="s in shapes"
               :key="s.id"
               :d="s.d"
               :class="['country', { 'country--here': s.id === current.id }]"
+              :style="{ '--bg': tints.get(s.id) }"
             />
           </svg>
         </div>
@@ -246,15 +275,16 @@ onMounted(async () => {
   max-height: 230px;
 }
 .context {
-  fill: #f1f2f6;
-  stroke: #c8ccd6;
-  stroke-width: 1;
+  fill: var(--bg, #eef0f5);
+  stroke: #b9bdc9;
+  stroke-width: 0.6;
   vector-effect: non-scaling-stroke;
 }
 .country {
-  fill: #dbdee8;
+  /* Subtle random per-country tint (var set inline) so neighbours read apart. */
+  fill: var(--bg, #dbdee8);
   stroke: #222a33;
-  stroke-width: 1;
+  stroke-width: 0.6;
   vector-effect: non-scaling-stroke;
 }
 /* The target country glows in the region hue so "location" reads at a glance. */

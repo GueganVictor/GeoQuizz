@@ -75,6 +75,12 @@ drill a **whole deck** — the full world or any single continent — outside th
 - **Interaction:** a location card **auto-zooms to the country's region**; user can
   **pinch-zoom** closer. Grading is **exact-shape hit-test** (the tapped path must be the
   target country).
+- **Per-country tint:** on the tappable quiz maps each country gets a **subtle, random**
+  pale background tint so neighbours read as separate shapes — which lets the outline stay
+  **thin** (a thick border otherwise eats small islands whole when zoomed out). The hue is
+  **re-rolled every render and carries no information**: a player must not be able to identify
+  a country by its colour instead of actually knowing the geography. (`src/lib/tint.ts`; the
+  mastery map is exempt — there colour *does* encode strength, see §8.)
 - **Region-scoped maps:** each region gets its own projected SVG — a single world projection
   makes small countries untappable even when zoomed. (Build-time pipeline; proven on Europe.)
 - **Surrounding-world context:** behind the region's own (interactive) deck, every *other*

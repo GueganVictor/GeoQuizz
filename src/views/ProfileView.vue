@@ -133,6 +133,22 @@ async function signOut() {
           <span class="toggle__knob" />
         </button>
       </div>
+      <div class="row">
+        <span class="row__label">
+          <span class="row__emoji">🔍</span> Region zoom
+          <span class="row__hint">Off shows the whole world</span>
+        </span>
+        <button
+          class="toggle"
+          :class="{ 'toggle--on': settings.regionZoom }"
+          role="switch"
+          :aria-checked="settings.regionZoom"
+          aria-label="Zoom maps to the country's region"
+          @click="settings.toggleRegionZoom()"
+        >
+          <span class="toggle__knob" />
+        </button>
+      </div>
     </div>
   </section>
 </template>
@@ -275,6 +291,14 @@ async function signOut() {
 }
 .row__emoji {
   margin-right: 6px;
+}
+.row__hint {
+  display: block;
+  margin-top: 2px;
+  font-family: var(--font-sans, inherit);
+  font-weight: 700;
+  font-size: 12px;
+  color: #9a9aac;
 }
 
 /* Video-game pill toggle: dark outline, knob slides + fill flips to green on. */

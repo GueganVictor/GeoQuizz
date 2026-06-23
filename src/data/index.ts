@@ -3,7 +3,7 @@
 
 import { DECKS_BY_CONTINENT, WORLD } from './countries'
 import { contextShapes, regionShapes, type CountryShape } from './geometry'
-import { REGION_FRAMES } from './regions'
+import { REGION_FRAMES, WORLD_FRAME } from './regions'
 import { CONTINENTS, type Continent, type Country } from './types'
 
 export type { Continent, Country } from './types'
@@ -21,7 +21,7 @@ export {
   DECKS_BY_CONTINENT,
   flagUrl,
 } from './countries'
-export { REGION_FRAMES } from './regions'
+export { REGION_FRAMES, WORLD_FRAME } from './regions'
 export { regionShapes } from './geometry'
 
 /** Decks by continent — every continent populated (DESIGN §9). */
@@ -76,3 +76,30 @@ export function contextForContinent(continent: Continent): CountryShape[] {
 
 /** Precomputed Europe map paths (kept for the v1 demo + back-compat). */
 export const EUROPE_SHAPES: CountryShape[] = SHAPES_BY_CONTINENT.europe
+
+/**
+ * Whole-world map paths (the tappable field when "region zoom" is off): every deck
+ * country projected into the single `WORLD_FRAME`. Lazily computed + memoized.
+ */
+let worldShapesCache: CountryShape[] | null = null
+export function worldShapes(): CountryShape[] {
+  if (!worldShapesCache) {
+    worldShapesCache = regionShapes(
+      WORLD.map((c) => c.id),
+      WORLD_FRAME,
+    )
+  }
+  return worldShapesCache
+}
+
+/** Surrounding context for the world frame — atlas countries not in the deck (territories etc.). */
+let worldContextCache: CountryShape[] | null = null
+export function worldContext(): CountryShape[] {
+  if (!worldContextCache) {
+    worldContextCache = contextShapes(
+      WORLD_FRAME,
+      WORLD.map((c) => c.id),
+    )
+  }
+  return worldContextCache
+}

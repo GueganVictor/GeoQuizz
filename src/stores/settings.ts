@@ -7,29 +7,35 @@ import { ref, watch } from 'vue'
 
 const KEY = 'geoquizz:settings'
 
-type Persisted = { sound: boolean; haptics: boolean }
+type Persisted = { sound: boolean; haptics: boolean; regionZoom: boolean }
 
 function load(): Persisted {
   try {
     const raw = localStorage.getItem(KEY)
     if (raw) {
       const p = JSON.parse(raw) as Partial<Persisted>
-      return { sound: p.sound ?? true, haptics: p.haptics ?? true }
+      return { sound: p.sound ?? true, haptics: p.haptics ?? true, regionZoom: p.regionZoom ?? true }
     }
   } catch {
     // ignore malformed / unavailable storage — fall back to defaults
   }
-  return { sound: true, haptics: true }
+  return { sound: true, haptics: true, regionZoom: true }
 }
 
 export const useSettingsStore = defineStore('settings', () => {
   const initial = load()
   const sound = ref(initial.sound)
   const haptics = ref(initial.haptics)
+  // Auto-zoom location cards to the target's continent (DESIGN §5). Off → the whole
+  // world is shown and the player zooms/pans in by hand (a harder, global mode).
+  const regionZoom = ref(initial.regionZoom)
 
-  watch([sound, haptics], () => {
+  watch([sound, haptics, regionZoom], () => {
     try {
-      localStorage.setItem(KEY, JSON.stringify({ sound: sound.value, haptics: haptics.value }))
+      localStorage.setItem(
+        KEY,
+        JSON.stringify({ sound: sound.value, haptics: haptics.value, regionZoom: regionZoom.value }),
+      )
     } catch {
       // storage unavailable (private mode) — preference just won't persist
     }
@@ -41,6 +47,9 @@ export const useSettingsStore = defineStore('settings', () => {
   function toggleHaptics() {
     haptics.value = !haptics.value
   }
+  function toggleRegionZoom() {
+    regionZoom.value = !regionZoom.value
+  }
 
-  return { sound, haptics, toggleSound, toggleHaptics }
+  return { sound, haptics, regionZoom, toggleSound, toggleHaptics, toggleRegionZoom }
 })
